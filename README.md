@@ -190,8 +190,8 @@ class DirectoryInfo:
 ``` python
 from cjm-nbdev-overview.parsers import (
     FunctionInfo,
-    ClassInfo,
     VariableInfo,
+    ClassInfo,
     ModuleInfo,
     extract_docments_signature,
     parse_function,
@@ -213,11 +213,40 @@ def extract_docments_signature(node: ast.FunctionDef,          # AST function no
 ```
 
 ``` python
+def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node with decorators
+                     ) -> List[str]:                              # List of decorator names
+    "Parse decorators from an AST node"
+```
+
+``` python
 def parse_function(node: ast.FunctionDef,               # AST function node
                   source_lines: List[str],              # Source code lines
                   is_exported: bool = False             # Has #| export
                   ) -> FunctionInfo:                    # Function information
     "Parse a function definition from AST"
+```
+
+``` python
+def _parse_class_methods(node: ast.ClassDef,           # AST class node
+                        source_lines: List[str],        # Source code lines
+                        is_exported: bool = False       # Has #| export
+                        ) -> List[FunctionInfo]:        # List of method information
+    "Parse methods from a class definition"
+```
+
+``` python
+def _parse_dataclass_attributes(node: ast.ClassDef,    # AST class node
+                               source_lines: List[str], # Source code lines
+                               is_exported: bool = False # Has #| export
+                               ) -> List[VariableInfo]: # List of attribute information
+    "Parse dataclass attributes from a class definition"
+```
+
+``` python
+def _generate_class_signature(node: ast.ClassDef,      # AST class node
+                             methods: List[FunctionInfo] # List of class methods
+                             ) -> str:                  # Class signature
+    "Generate a class signature including __init__ if present"
 ```
 
 ``` python
@@ -271,6 +300,18 @@ class FunctionInfo:
 
 ``` python
 @dataclass
+class VariableInfo:
+    "Information about a module-level variable"
+    
+    name: str  # Variable name
+    value: Optional[str]  # String representation of value
+    type_hint: Optional[str]  # Type annotation if present
+    comment: Optional[str]  # Inline comment
+    is_exported: bool = False  # Has #| export
+```
+
+``` python
+@dataclass
 class ClassInfo:
     "Information about a class"
     
@@ -282,18 +323,6 @@ class ClassInfo:
     attributes: List[VariableInfo] = field(...)  # Class attributes (for dataclasses)
     is_exported: bool = False  # Has #| export
     source_line: Optional[int]  # Line number in source
-```
-
-``` python
-@dataclass
-class VariableInfo:
-    "Information about a module-level variable"
-    
-    name: str  # Variable name
-    value: Optional[str]  # String representation of value
-    type_hint: Optional[str]  # Type annotation if present
-    comment: Optional[str]  # Inline comment
-    is_exported: bool = False  # Has #| export
 ```
 
 ``` python
@@ -425,7 +454,7 @@ from cjm-nbdev-overview.api_docs import (
 #### Functions
 
 ``` python
-def format_function_doc(func: FunctionInfo,             # Function informationFor the `add_cli_reference_section` function, remember that while we are using this project's functionality on itself, it is meant to be used on other nbdev projects as well. Therefore, we should first check the project's `settings.ini` file to see if the `console_scripts` value has anything, we can do that with `cfg = get_config(); cfg.console_scripts` (e.g., 'nbdev-overview=cjm_nbdev_overview.cli:main'). I believe we should then be able to use that to get the CLI reference info. Rather than hardcoding the CLI reference, we should programmatically generate it to account for changes.  
+def format_function_doc(func: FunctionInfo,             # Function information
                        indent: str = ""                 # Indentation prefix
                        ) -> str:                        # Formatted documentation
     "Format a function with its signature for documentation"
@@ -441,6 +470,43 @@ def format_class_doc(cls: ClassInfo                     # Class information
 def format_variable_doc(var: VariableInfo               # Variable information
                        ) -> str:                        # Formatted documentation
     "Format a variable for documentation"
+```
+
+``` python
+def _generate_module_header(module: ModuleInfo          # Module information
+                          ) -> List[str]:               # Header lines
+    "Generate module title and description lines"
+```
+
+``` python
+def _generate_import_statement(module: ModuleInfo       # Module information
+                             ) -> List[str]:            # Import statement lines
+    "Generate import statement lines for a module"
+```
+
+``` python
+def _filter_module_items(module: ModuleInfo,            # Module information
+                        show_all: bool = False          # Show all items including private
+                        ) -> tuple:                     # (functions, classes, variables)
+    "Filter module items based on show_all and is_exported flags"
+```
+
+``` python
+def _generate_functions_section(functions: List[FunctionInfo]   # List of functions
+                              ) -> List[str]:                   # Section lines
+    "Generate the functions section of module documentation"
+```
+
+``` python
+def _generate_classes_section(classes: List[ClassInfo]          # List of classes
+                            ) -> List[str]:                     # Section lines
+    "Generate the classes section of module documentation"
+```
+
+``` python
+def _generate_variables_section(variables: List[VariableInfo]   # List of variables
+                              ) -> List[str]:                   # Section lines
+    "Generate the variables section of module documentation"
 ```
 
 ``` python

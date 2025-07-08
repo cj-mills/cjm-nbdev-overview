@@ -24,7 +24,7 @@ __all__ = ['format_function_doc', 'format_class_doc', 'format_variable_doc', 'ge
            'add_dependencies_section', 'add_cli_reference_section', 'update_index_comprehensive']
 
 # %% ../nbs/03_api_docs.ipynb 5
-def format_function_doc(func: FunctionInfo,             # Function informationFor the `add_cli_reference_section` function, remember that while we are using this project's functionality on itself, it is meant to be used on other nbdev projects as well. Therefore, we should first check the project's `settings.ini` file to see if the `console_scripts` value has anything, we can do that with `cfg = get_config(); cfg.console_scripts` (e.g., 'nbdev-overview=cjm_nbdev_overview.cli:main'). I believe we should then be able to use that to get the CLI reference info. Rather than hardcoding the CLI reference, we should programmatically generate it to account for changes.  
+def format_function_doc(func: FunctionInfo,             # Function information
                        indent: str = ""                 # Indentation prefix
                        ) -> str:                        # Formatted documentation
     "Format a function with its signature for documentation"
@@ -144,10 +144,9 @@ def format_variable_doc(var: VariableInfo               # Variable information
     return ''.join(parts)
 
 # %% ../nbs/03_api_docs.ipynb 9
-def generate_module_overview(module: ModuleInfo,        # Module information
-                           show_all: bool = False       # Show all items including private
-                           ) -> str:                    # Module overview markdown
-    "Generate a markdown overview for a module"
+def _generate_module_header(module: ModuleInfo          # Module information
+                          ) -> List[str]:               # Header lines
+    "Generate module title and description lines"
     lines = []
     
     # Add module title
@@ -160,10 +159,15 @@ def generate_module_overview(module: ModuleInfo,        # Module information
     if module.description:
         lines.append(f"> {module.description}")
     
-    # Add import statements section
+    return lines
+
+# %% ../nbs/03_api_docs.ipynb 10
+def _generate_import_statement(module: ModuleInfo       # Module information
+                             ) -> List[str]:            # Import statement lines
+    "Generate import statement lines for a module"
+    lines = []
     lines.append("\n#### Import\n")
     
-    # Generate import statement based on the corresponding Python file
     try:
         from nbdev.config import get_config
         cfg = get_config()
@@ -233,7 +237,13 @@ def generate_module_overview(module: ModuleInfo,        # Module information
         lines.append(f"# Import statements not available")
         lines.append("```")
     
-    # Filter items based on show_all and is_exported
+    return lines
+
+# %% ../nbs/03_api_docs.ipynb 11
+def _filter_module_items(module: ModuleInfo,            # Module information
+                        show_all: bool = False          # Show all items including private
+                        ) -> tuple:                     # (functions, classes, variables)
+    "Filter module items based on show_all and is_exported flags"
     if show_all:
         functions = module.functions
         classes = module.classes  
@@ -243,31 +253,67 @@ def generate_module_overview(module: ModuleInfo,        # Module information
         classes = [c for c in module.classes if c.is_exported]
         variables = [v for v in module.variables if v.is_exported]
     
-    # Add functions section
+    return functions, classes, variables
+
+# %% ../nbs/03_api_docs.ipynb 12
+def _generate_functions_section(functions: List[FunctionInfo]   # List of functions
+                              ) -> List[str]:                   # Section lines
+    "Generate the functions section of module documentation"
+    lines = []
     if functions:
         lines.append("\n#### Functions\n")
         for func in functions:
             lines.append(format_function_doc(func))
             lines.append("")
-    
-    # Add classes section
+    return lines
+
+def _generate_classes_section(classes: List[ClassInfo]          # List of classes
+                            ) -> List[str]:                     # Section lines
+    "Generate the classes section of module documentation"
+    lines = []
     if classes:
         lines.append("#### Classes\n")
         for cls in classes:
             lines.append(format_class_doc(cls))
             lines.append("")
-    
-    # Add variables section
+    return lines
+
+def _generate_variables_section(variables: List[VariableInfo]   # List of variables
+                              ) -> List[str]:                   # Section lines
+    "Generate the variables section of module documentation"
+    lines = []
     if variables:
         lines.append("#### Variables\n")
         lines.append("```python")
         for var in variables:
             lines.append(format_variable_doc(var))
         lines.append("```")
+    return lines
+
+# %% ../nbs/03_api_docs.ipynb 13
+def generate_module_overview(module: ModuleInfo,        # Module information
+                           show_all: bool = False       # Show all items including private
+                           ) -> str:                    # Module overview markdown
+    "Generate a markdown overview for a module"
+    lines = []
+    
+    # Generate header (title and description)
+    lines.extend(_generate_module_header(module))
+    
+    # Generate import statement
+    lines.extend(_generate_import_statement(module))
+    
+    # Filter items based on show_all and is_exported
+    functions, classes, variables = _filter_module_items(module, show_all)
+    
+    # Generate sections for functions, classes, and variables
+    lines.extend(_generate_functions_section(functions))
+    lines.extend(_generate_classes_section(classes))
+    lines.extend(_generate_variables_section(variables))
     
     return '\n'.join(lines)
 
-# %% ../nbs/03_api_docs.ipynb 10
+# %% ../nbs/03_api_docs.ipynb 14
 def generate_project_api_docs(path: Path = None,        # Project path (defaults to nbs_path)
                             show_all: bool = False      # Show all items including private
                             ) -> str:                   # Full API documentation
@@ -307,7 +353,7 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
     
     return '\n'.join(lines)
 
-# %% ../nbs/03_api_docs.ipynb 12
+# %% ../nbs/03_api_docs.ipynb 16
 def _filter_cells_removing_sections(cells: List,               # List of notebook cells
                                    start_marker: str            # Section marker to remove
                                    ) -> List:                   # Filtered cells
@@ -332,7 +378,7 @@ def _filter_cells_removing_sections(cells: List,               # List of noteboo
     
     return cells_to_keep
 
-# %% ../nbs/03_api_docs.ipynb 13
+# %% ../nbs/03_api_docs.ipynb 17
 def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
                              ) -> List[Path]:                   # Sorted notebook paths
     "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
@@ -344,7 +390,7 @@ def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebo
     
     return sorted(notebooks, key=sort_key)
 
-# %% ../nbs/03_api_docs.ipynb 14
+# %% ../nbs/03_api_docs.ipynb 18
 def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
                                ) -> List[Path]:                 # Notebooks with exported content
     "Filter notebooks to only include those with exported content"
@@ -373,7 +419,7 @@ def _get_notebooks_with_exports(notebooks: List[Path]          # List of noteboo
     
     return notebooks_with_exports
 
-# %% ../nbs/03_api_docs.ipynb 15
+# %% ../nbs/03_api_docs.ipynb 19
 def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
                                    ) -> List:                   # List of notebook cells
     "Generate markdown cells containing module overview documentation"
@@ -397,7 +443,7 @@ def _generate_module_overview_cells(notebooks: List[Path]      # List of noteboo
     
     return module_cells
 
-# %% ../nbs/03_api_docs.ipynb 16
+# %% ../nbs/03_api_docs.ipynb 20
 def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
                            start_marker: str = "## Module Overview"  # Marker to identify module docs section
                            ) -> None:                          # Updates index.ipynb in place
@@ -426,7 +472,7 @@ def update_index_module_docs(index_path: Path = None,          # Path to index.i
     # Write the updated notebook
     write_nb(nb, index_path)
 
-# %% ../nbs/03_api_docs.ipynb 19
+# %% ../nbs/03_api_docs.ipynb 23
 def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
                                  marker: str = "## Project Structure",  # Section marker
                                  exclude_index: bool = True     # Exclude index.ipynb from tree
@@ -453,7 +499,7 @@ def add_project_structure_section(index_path: Path = None,      # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 20
+# %% ../nbs/03_api_docs.ipynb 24
 def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
                            marker: str = "## Module Dependencies", # Section marker
                            direction: str = "LR"                # Diagram direction
@@ -487,7 +533,7 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 21
+# %% ../nbs/03_api_docs.ipynb 25
 import subprocess
 import importlib.util
 import argparse
@@ -567,7 +613,7 @@ def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 22
+# %% ../nbs/03_api_docs.ipynb 26
 def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
                               include_structure: bool = True,  # Include project structure
                               include_dependencies: bool = True, # Include module dependencies

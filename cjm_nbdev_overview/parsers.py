@@ -115,6 +115,18 @@ def extract_docments_signature(node: ast.FunctionDef,          # AST function no
     return f"def {node.name}(...)"
 
 # %% ../nbs/01_parsers.ipynb 11
+def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node with decorators
+                     ) -> List[str]:                              # List of decorator names
+    "Parse decorators from an AST node"
+    decorators = []
+    for decorator in node.decorator_list:
+        if isinstance(decorator, ast.Name):
+            decorators.append(decorator.id)
+        elif isinstance(decorator, ast.Attribute):
+            decorators.append(f"{decorator.attr}")
+    return decorators
+
+# %% ../nbs/01_parsers.ipynb 12
 def parse_function(node: ast.FunctionDef,               # AST function node
                   source_lines: List[str],              # Source code lines
                   is_exported: bool = False             # Has #| export
@@ -127,12 +139,7 @@ def parse_function(node: ast.FunctionDef,               # AST function node
     docstring = ast.get_docstring(node)
     
     # Get decorators
-    decorators = []
-    for decorator in node.decorator_list:
-        if isinstance(decorator, ast.Name):
-            decorators.append(decorator.id)
-        elif isinstance(decorator, ast.Attribute):
-            decorators.append(f"{decorator.attr}")
+    decorators = _parse_decorators(node)
     
     return FunctionInfo(
         name=node.name,
@@ -143,77 +150,76 @@ def parse_function(node: ast.FunctionDef,               # AST function node
         source_line=node.lineno
     )
 
-# %% ../nbs/01_parsers.ipynb 12
-def parse_class(node: ast.ClassDef,                    # AST class node
-               source_lines: List[str],                # Source code lines
-               is_exported: bool = False               # Has #| export
-               ) -> ClassInfo:                         # Class information
-    "Parse a class definition from AST"
-    # Get class docstring
-    docstring = ast.get_docstring(node)
-    
-    # Get decorators
-    decorators = []
-    for decorator in node.decorator_list:
-        if isinstance(decorator, ast.Name):
-            decorators.append(decorator.id)
-        elif isinstance(decorator, ast.Attribute):
-            decorators.append(f"{decorator.attr}")
-    
-    # Parse methods
+# %% ../nbs/01_parsers.ipynb 13
+def _parse_class_methods(node: ast.ClassDef,           # AST class node
+                        source_lines: List[str],        # Source code lines
+                        is_exported: bool = False       # Has #| export
+                        ) -> List[FunctionInfo]:        # List of method information
+    "Parse methods from a class definition"
     methods = []
     for item in node.body:
         if isinstance(item, ast.FunctionDef):
             method_info = parse_function(item, source_lines, is_exported)
             methods.append(method_info)
-    
-    # Extract dataclass attributes if this is a dataclass
+    return methods
+
+# %% ../nbs/01_parsers.ipynb 14
+def _parse_dataclass_attributes(node: ast.ClassDef,    # AST class node
+                               source_lines: List[str], # Source code lines
+                               is_exported: bool = False # Has #| export
+                               ) -> List[VariableInfo]: # List of attribute information
+    "Parse dataclass attributes from a class definition"
     attributes = []
-    is_dataclass = 'dataclass' in decorators
-    
-    if is_dataclass:
-        for item in node.body:
-            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
-                # This is a type-annotated attribute
-                attr_name = item.target.id
-                type_hint = ast.unparse(item.annotation) if hasattr(ast, 'unparse') else str(item.annotation)
-                
-                # Get the default value if present
-                default_value = None
-                if item.value:
-                    try:
-                        if isinstance(item.value, ast.Constant):
-                            default_value = repr(item.value.value)
-                        elif isinstance(item.value, ast.Call):
-                            # Handle field() calls
-                            if isinstance(item.value.func, ast.Name) and item.value.func.id == 'field':
-                                default_value = "field(...)"
-                            else:
-                                default_value = ast.unparse(item.value) if hasattr(ast, 'unparse') else "..."
+    for item in node.body:
+        if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+            # This is a type-annotated attribute
+            attr_name = item.target.id
+            type_hint = ast.unparse(item.annotation) if hasattr(ast, 'unparse') else str(item.annotation)
+            
+            # Get the default value if present
+            default_value = None
+            if item.value:
+                try:
+                    if isinstance(item.value, ast.Constant):
+                        default_value = repr(item.value.value)
+                    elif isinstance(item.value, ast.Call):
+                        # Handle field() calls
+                        if isinstance(item.value.func, ast.Name) and item.value.func.id == 'field':
+                            default_value = "field(...)"
                         else:
                             default_value = ast.unparse(item.value) if hasattr(ast, 'unparse') else "..."
-                    except:
-                        default_value = "..."
-                
-                # Get inline comment
-                comment = None
-                if item.lineno <= len(source_lines):
-                    line = source_lines[item.lineno - 1]
-                    comment_match = re.search(r'#\s*(.+)$', line)
-                    if comment_match:
-                        comment = comment_match.group(1).strip()
-                
-                attr_info = VariableInfo(
-                    name=attr_name,
-                    type_hint=type_hint,
-                    value=default_value,
-                    comment=comment,
-                    is_exported=is_exported
-                )
-                attributes.append(attr_info)
-    
-    # Extract class signature (including __init__ if present)
+                    else:
+                        default_value = ast.unparse(item.value) if hasattr(ast, 'unparse') else "..."
+                except:
+                    default_value = "..."
+            
+            # Get inline comment
+            comment = None
+            if item.lineno <= len(source_lines):
+                line = source_lines[item.lineno - 1]
+                comment_match = re.search(r'#\s*(.+)$', line)
+                if comment_match:
+                    comment = comment_match.group(1).strip()
+            
+            attr_info = VariableInfo(
+                name=attr_name,
+                type_hint=type_hint,
+                value=default_value,
+                comment=comment,
+                is_exported=is_exported
+            )
+            attributes.append(attr_info)
+    return attributes
+
+# %% ../nbs/01_parsers.ipynb 15
+def _generate_class_signature(node: ast.ClassDef,      # AST class node
+                             methods: List[FunctionInfo] # List of class methods
+                             ) -> str:                  # Class signature
+    "Generate a class signature including __init__ if present"
+    # Start with basic class signature
     class_sig = f"class {node.name}"
+    
+    # Add base classes if present
     if node.bases:
         base_names = []
         for base in node.bases:
@@ -223,12 +229,40 @@ def parse_class(node: ast.ClassDef,                    # AST class node
                 base_names.append(f"{base.attr}")
         if base_names:
             class_sig += f"({', '.join(base_names)})"
+    
     class_sig += ":"
     
     # If there's an __init__ method, include its signature
     init_method = next((m for m in methods if m.name == "__init__"), None)
     if init_method:
         class_sig = f"class {node.name}:\n    {init_method.signature}"
+    
+    return class_sig
+
+# %% ../nbs/01_parsers.ipynb 16
+def parse_class(node: ast.ClassDef,                    # AST class node
+               source_lines: List[str],                # Source code lines
+               is_exported: bool = False               # Has #| export
+               ) -> ClassInfo:                         # Class information
+    "Parse a class definition from AST"
+    # Get class docstring
+    docstring = ast.get_docstring(node)
+    
+    # Get decorators
+    decorators = _parse_decorators(node)
+    
+    # Parse methods
+    methods = _parse_class_methods(node, source_lines, is_exported)
+    
+    # Extract dataclass attributes if this is a dataclass
+    attributes = []
+    is_dataclass = 'dataclass' in decorators
+    
+    if is_dataclass:
+        attributes = _parse_dataclass_attributes(node, source_lines, is_exported)
+    
+    # Generate class signature
+    class_sig = _generate_class_signature(node, methods)
     
     return ClassInfo(
         name=node.name,
@@ -241,7 +275,7 @@ def parse_class(node: ast.ClassDef,                    # AST class node
         source_line=node.lineno
     )
 
-# %% ../nbs/01_parsers.ipynb 13
+# %% ../nbs/01_parsers.ipynb 17
 def parse_variable(node: Union[ast.Assign, ast.AnnAssign],    # AST assignment node
                   source_lines: List[str],                     # Source code lines
                   is_exported: bool = False                    # Has #| export
@@ -303,7 +337,7 @@ def parse_variable(node: Union[ast.Assign, ast.AnnAssign],    # AST assignment n
     
     return variables
 
-# %% ../nbs/01_parsers.ipynb 15
+# %% ../nbs/01_parsers.ipynb 19
 def parse_code_cell(cell: Dict[str, Any]                       # Notebook code cell
                    ) -> Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:  # TODO: Add return description
     "Parse a notebook code cell for functions, classes, variables, and imports"
@@ -363,7 +397,7 @@ def parse_code_cell(cell: Dict[str, Any]                       # Notebook code c
     
     return functions, classes, variables, imports
 
-# %% ../nbs/01_parsers.ipynb 17
+# %% ../nbs/01_parsers.ipynb 21
 def parse_notebook(path: Path                           # Path to notebook
                   ) -> ModuleInfo:                      # Module information
     "Parse a notebook file for module information"
@@ -396,7 +430,7 @@ def parse_notebook(path: Path                           # Path to notebook
     
     return module_info
 
-# %% ../nbs/01_parsers.ipynb 18
+# %% ../nbs/01_parsers.ipynb 22
 def parse_python_file(path: Path                        # Path to Python file
                      ) -> ModuleInfo:                   # Module information
     "Parse a Python file for module information"
