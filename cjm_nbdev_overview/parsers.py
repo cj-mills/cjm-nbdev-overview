@@ -16,7 +16,7 @@ import inspect
 from fastcore.imports import *
 
 # %% auto 0
-__all__ = ['FunctionInfo', 'ClassInfo', 'VariableInfo', 'ModuleInfo', 'extract_docments_signature', 'parse_function',
+__all__ = ['FunctionInfo', 'VariableInfo', 'ClassInfo', 'ModuleInfo', 'extract_docments_signature', 'parse_function',
            'parse_class', 'parse_variable', 'parse_code_cell', 'parse_notebook', 'parse_python_file']
 
 # %% ../nbs/01_parsers.ipynb 5
@@ -32,6 +32,16 @@ class FunctionInfo:
 
 # %% ../nbs/01_parsers.ipynb 6
 @dataclass
+class VariableInfo:
+    "Information about a module-level variable"
+    name: str                                      # Variable name
+    value: Optional[str] = None                   # String representation of value
+    type_hint: Optional[str] = None               # Type annotation if present
+    comment: Optional[str] = None                 # Inline comment
+    is_exported: bool = False                     # Has #| export
+
+# %% ../nbs/01_parsers.ipynb 7
+@dataclass
 class ClassInfo:
     "Information about a class"
     name: str                                      # Class name
@@ -42,16 +52,6 @@ class ClassInfo:
     attributes: List[VariableInfo] = field(default_factory=list)  # Class attributes (for dataclasses)
     is_exported: bool = False                     # Has #| export
     source_line: Optional[int] = None             # Line number in source
-
-# %% ../nbs/01_parsers.ipynb 7
-@dataclass
-class VariableInfo:
-    "Information about a module-level variable"
-    name: str                                      # Variable name
-    value: Optional[str] = None                   # String representation of value
-    type_hint: Optional[str] = None               # Type annotation if present
-    comment: Optional[str] = None                 # Inline comment
-    is_exported: bool = False                     # Has #| export
 
 # %% ../nbs/01_parsers.ipynb 8
 @dataclass

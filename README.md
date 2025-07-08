@@ -154,6 +154,12 @@ def get_cell_source(cell: Dict[str, Any]        # Notebook cell
 class NotebookInfo:
     "Information about a single notebook"
     
+    path: Path  # Path to the notebook file
+    name: str  # Notebook filename without extension
+    title: Optional[str]  # H1 title from first cell
+    description: Optional[str]  # Blockquote description from first cell
+    export_module: Optional[str]  # Module name from default_exp
+    
     def relative_path(self) -> Path:       # Path relative to nbs directory
         "Get path relative to nbs directory"
 ```
@@ -162,6 +168,13 @@ class NotebookInfo:
 @dataclass
 class DirectoryInfo:
     "Information about a directory in the nbs folder"
+    
+    path: Path  # Path to the directory
+    name: str  # Directory name
+    notebook_count: int = 0  # Number of notebooks in directory
+    description: Optional[str]  # Description from folder's main notebook
+    subdirs: List[DirectoryInfo] = field(...)  # Subdirectories
+    notebooks: List[NotebookInfo] = field(...)  # Notebooks in this directory
     
     def total_notebook_count(self) -> int:          # Total notebooks including subdirs
         "Get total notebook count including subdirectories"
@@ -247,24 +260,55 @@ def parse_python_file(path: Path                        # Path to Python file
 @dataclass
 class FunctionInfo:
     "Information about a function"
+    
+    name: str  # Function name
+    signature: str  # Full signature with docments
+    docstring: Optional[str]  # Function docstring
+    decorators: List[str] = field(...)  # List of decorators
+    is_exported: bool = False  # Has #| export
+    source_line: Optional[int]  # Line number in source
 ```
 
 ``` python
 @dataclass
 class ClassInfo:
     "Information about a class"
+    
+    name: str  # Class name
+    signature: str  # Class signature with __init__
+    docstring: Optional[str]  # Class docstring
+    methods: List[FunctionInfo] = field(...)  # Class methods
+    decorators: List[str] = field(...)  # Class decorators
+    attributes: List[VariableInfo] = field(...)  # Class attributes (for dataclasses)
+    is_exported: bool = False  # Has #| export
+    source_line: Optional[int]  # Line number in source
 ```
 
 ``` python
 @dataclass
 class VariableInfo:
     "Information about a module-level variable"
+    
+    name: str  # Variable name
+    value: Optional[str]  # String representation of value
+    type_hint: Optional[str]  # Type annotation if present
+    comment: Optional[str]  # Inline comment
+    is_exported: bool = False  # Has #| export
 ```
 
 ``` python
 @dataclass
 class ModuleInfo:
     "Information about a module (notebook or Python file)"
+    
+    path: Path  # Path to module
+    name: str  # Module name
+    title: Optional[str]  # H1 title from notebook
+    description: Optional[str]  # Module description
+    functions: List[FunctionInfo] = field(...)  # Functions in module
+    classes: List[ClassInfo] = field(...)  # Classes in module
+    variables: List[VariableInfo] = field(...)  # Variables in module
+    imports: List[str] = field(...)  # Import statements
 ```
 
 ### Directory Tree Visualization (`02_tree.ipynb`)
@@ -539,12 +583,20 @@ def generate_dependency_matrix(graph: DependencyGraph   # Dependency graph
 @dataclass
 class ModuleDependency:
     "Represents a dependency between modules"
+    
+    source: str  # Source module name
+    target: str  # Target module name
+    import_type: str  # Type of import (from/import)
+    imported_names: List[str] = field(...)  # Specific names imported
 ```
 
 ``` python
 @dataclass
 class DependencyGraph:
     "Dependency graph for a project"
+    
+    modules: Dict[str, ModuleInfo] = field(...)  # Module name -> ModuleInfo
+    dependencies: List[ModuleDependency] = field(...)  # All dependencies
     
     def add_module(
             self,
