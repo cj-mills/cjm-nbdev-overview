@@ -101,6 +101,79 @@ nbdev-overview overview
 nbdev-overview update-index
 ```
 
+## Project Structure
+
+    nbs/
+    ├── 00_core.ipynb            # Core utilities and data models for nbdev project overview generation
+    ├── 01_parsers.ipynb         # Parse notebook metadata, content, and extract function/class signatures with docments
+    ├── 02_tree.ipynb            # Generate tree visualizations for nbdev project structure
+    ├── 03_api_docs.ipynb        # Generate module overviews with formatted signatures for nbdev projects
+    ├── 04_dependencies.ipynb    # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
+    ├── 05_generators.ipynb      # Auto-generate folder_name.ipynb notebooks for nbdev project organization
+    ├── 06_cli.ipynb             # CLI commands for nbdev project overview generation and analysis
+    └── index.ipynb              # Generate comprehensive overviews, API references, and project structure visualizations for nbdev projects to enhance developer and AI assistant understanding.
+
+Total: 8 notebooks
+
+## Module Dependencies
+
+``` mermaid
+graph LR
+    core[core<br/>Core Utilities]
+    parsers[parsers<br/>Notebook and Module Parsing]
+    tree[tree<br/>Directory Tree Visualization]
+    api_docs[api_docs<br/>API Documentation Generation]
+    dependencies[dependencies<br/>Dependency Analysis and Visualization]
+    generators[generators<br/>Auto-generation Utilities]
+    cli[cli<br/>Command-Line Interface]
+
+    parsers --> core
+    parsers --> tree
+    tree --> core
+    api_docs --> parsers
+    api_docs --> core
+    api_docs --> tree
+    api_docs --> dependencies
+    dependencies --> core
+    dependencies --> parsers
+    generators --> core
+    generators --> tree
+    cli --> tree
+    cli --> dependencies
+    cli --> api_docs
+    cli --> parsers
+
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
+```
+
+*15 cross-module dependencies detected*
+
+## CLI Reference
+
+### `nbdev-overview` Command
+
+    usage: nbdev-overview [-h]
+                          {tree,api,deps,overview,update-index,update-comprehensive}
+                          ...
+
+    Generate comprehensive overviews for nbdev projects
+
+    positional arguments:
+      {tree,api,deps,overview,update-index,update-comprehensive}
+                            Available commands
+        tree                Generate directory tree visualization
+        api                 Generate API documentation
+        deps                Analyze module dependencies
+        overview            Generate complete project overview
+        update-index        Update index.ipynb with module documentation
+        update-comprehensive
+                            Comprehensive update of index.ipynb with all sections
+
+    options:
+      -h, --help            show this help message and exit
+
+For detailed help on any command, use `nbdev-overview <command> --help`.
+
 ## Module Overview
 
 Detailed documentation for each module in the project:
@@ -319,7 +392,7 @@ def get_tree_summary(path: Path = None              # Directory to analyze
 #### Functions
 
 ``` python
-def format_function_doc(func: FunctionInfo,             # Function information
+def format_function_doc(func: FunctionInfo,             # Function informationFor the `add_cli_reference_section` function, remember that while we are using this project's functionality on itself, it is meant to be used on other nbdev projects as well. Therefore, we should first check the project's `settings.ini` file to see if the `console_scripts` value has anything, we can do that with `cfg = get_config(); cfg.console_scripts` (e.g., 'nbdev-overview=cjm_nbdev_overview.cli:main'). I believe we should then be able to use that to get the CLI reference info. Rather than hardcoding the CLI reference, we should programmatically generate it to account for changes.  
                        indent: str = ""                 # Indentation prefix
                        ) -> str:                        # Formatted documentation
     "Format a function with its signature for documentation"
@@ -356,6 +429,37 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
                            start_marker: str = "## Module Overview",  # Marker to identify module docs section
                            ) -> None:                    # Updates index.ipynb in place
     "Update the module documentation section in index.ipynb"
+```
+
+``` python
+def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
+                                 marker: str = "## Project Structure"  # Section marker
+                                 ) -> str:                       # Generated structure content
+    "Generate project structure tree content for index.ipynb"
+```
+
+``` python
+def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
+                           marker: str = "## Module Dependencies", # Section marker
+                           direction: str = "LR"                # Diagram direction
+                           ) -> str:                            # Generated dependencies content
+    "Generate module dependencies diagram content for index.ipynb"
+```
+
+``` python
+def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
+                            ) -> str:                           # Generated CLI content
+    "Generate CLI reference content for index.ipynb based on project's console scripts"
+```
+
+``` python
+def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
+                              include_structure: bool = True,  # Include project structure
+                              include_dependencies: bool = True, # Include module dependencies
+                              include_cli: bool = True,         # Include CLI reference
+                              include_modules: bool = True      # Include module documentation
+                              ) -> None:                        # Updates index.ipynb in place
+    "Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"
 ```
 
 ### Dependency Analysis and Visualization (`04_dependencies.ipynb`)
@@ -512,6 +616,13 @@ def update_index_cmd(
     args  # TODO: Add type hint and description
 ): # Command line arguments - TODO: Add type hint
     "Update index.ipynb with module documentation"
+```
+
+``` python
+def update_comprehensive_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Comprehensively update index.ipynb with all sections"
 ```
 
 ``` python

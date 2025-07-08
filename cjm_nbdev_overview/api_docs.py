@@ -10,6 +10,7 @@ from nbdev.config import get_config
 from .core import *
 from .parsers import *
 from .tree import *
+from .dependencies import *
 from dataclasses import dataclass
 import textwrap
 
@@ -19,10 +20,11 @@ import re
 
 # %% auto 0
 __all__ = ['format_function_doc', 'format_class_doc', 'format_variable_doc', 'generate_module_overview',
-           'generate_project_api_docs', 'update_index_module_docs']
+           'generate_project_api_docs', 'update_index_module_docs', 'add_project_structure_section',
+           'add_dependencies_section', 'add_cli_reference_section', 'update_index_comprehensive']
 
 # %% ../nbs/03_api_docs.ipynb 5
-def format_function_doc(func: FunctionInfo,             # Function information
+def format_function_doc(func: FunctionInfo,             # Function informationFor the `add_cli_reference_section` function, remember that while we are using this project's functionality on itself, it is meant to be used on other nbdev projects as well. Therefore, we should first check the project's `settings.ini` file to see if the `console_scripts` value has anything, we can do that with `cfg = get_config(); cfg.console_scripts` (e.g., 'nbdev-overview=cjm_nbdev_overview.cli:main'). I believe we should then be able to use that to get the CLI reference info. Rather than hardcoding the CLI reference, we should programmatically generate it to account for changes.  
                        indent: str = ""                 # Indentation prefix
                        ) -> str:                        # Formatted documentation
     "Format a function with its signature for documentation"
@@ -260,7 +262,10 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
     module_cells.append(header_cell)
     
     # Sort notebooks by their numeric prefix if they have one
-    def sort_key(nb_path):
+    def sort_key(
+        nb_path  # TODO: Add type hint and description
+    ): # TODO: Add type hint
+        "TODO: Add function description"
         match = re.match(r'^(\d+)', nb_path.stem)
         if match:
             return (int(match.group(1)), nb_path.stem)
@@ -294,6 +299,283 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
     
     # Rebuild the notebook with the new module overview at the end
     nb.cells = cells_to_keep + module_cells
+    
+    # Write the updated notebook
+    write_nb(nb, index_path)
+
+# %% ../nbs/03_api_docs.ipynb 15
+def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
+                                 marker: str = "## Project Structure"  # Section marker
+                                 ) -> str:                       # Generated structure content
+    "Generate project structure tree content for index.ipynb"
+    if index_path is None:
+        cfg = get_config()
+        path = cfg.nbs_path
+    else:
+        path = index_path.parent
+    
+    # Generate tree with descriptions
+    tree_content = generate_tree_with_descriptions(path)
+    
+    # Get summary statistics
+    summary = get_tree_summary(path)
+    
+    # Create the complete section
+    content = f"{marker}\n\n"
+    content += "```\n"
+    content += tree_content
+    content += "\n```\n\n"
+    content += summary
+    
+    return content
+
+# %% ../nbs/03_api_docs.ipynb 16
+def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
+                           marker: str = "## Module Dependencies", # Section marker
+                           direction: str = "LR"                # Diagram direction
+                           ) -> str:                            # Generated dependencies content
+    "Generate module dependencies diagram content for index.ipynb"
+    if index_path is None:
+        cfg = get_config()
+        path = cfg.nbs_path
+    else:
+        path = index_path.parent
+    
+    # Build dependency graph
+    graph = build_dependency_graph(path)
+    
+    # Generate Mermaid diagram
+    diagram = generate_mermaid_diagram(graph, direction=direction)
+    
+    # Create the complete section
+    content = f"{marker}\n\n"
+    content += diagram  # diagram already includes ```mermaid wrapper
+    content += "\n\n"
+    
+    # Add dependency matrix if there are dependencies
+    if graph.dependencies:
+        # Comment out the dependency matrix for now due to Markdown rendering issues
+        # content += "### Dependency Matrix\n\n"
+        # content += generate_dependency_matrix(graph)
+        content += f"*{len(graph.dependencies)} cross-module dependencies detected*"
+    else:
+        content += "No cross-module dependencies detected."
+    
+    return content
+
+# %% ../nbs/03_api_docs.ipynb 17
+import subprocess
+import importlib.util
+import argparse
+from typing import Optional
+
+def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
+                            ) -> str:                           # Generated CLI content
+    "Generate CLI reference content for index.ipynb based on project's console scripts"
+    
+    cfg = get_config()
+    
+    # Check if project has console scripts
+    console_scripts = getattr(cfg, 'console_scripts', None)
+    if not console_scripts:
+        return f"{marker}\n\nNo CLI commands found in this project."
+    
+    content = f"{marker}\n\n"
+    
+    # Parse console scripts to find CLI commands
+    cli_commands = []
+    if console_scripts:
+        for script in console_scripts.split():
+            if '=' in script:
+                script_name, module_path = script.split('=', 1)
+                cli_commands.append((script_name, module_path))
+    
+    if not cli_commands:
+        return f"{marker}\n\nNo CLI commands found in this project."
+    
+    # Generate documentation for each CLI command
+    for script_name, module_path in cli_commands:
+        content += f"### `{script_name}` Command\n\n"
+        
+        try:
+            # Try to get help text by running the command
+            result = subprocess.run([script_name, '--help'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                # Parse the help output to extract commands
+                help_text = result.stdout
+                content += "```\n"
+                content += help_text
+                content += "\n```\n\n"
+                
+                # Extract subcommands if they exist
+                if 'Available commands:' in help_text or 'subcommands:' in help_text.lower():
+                    content += f"#### Usage Examples\n\n"
+                    content += "```bash\n"
+                    
+                    # Extract command names from help text
+                    lines = help_text.split('\n')
+                    in_commands_section = False
+                    
+                    for line in lines:
+                        if 'available commands' in line.lower() or 'subcommands' in line.lower():
+                            in_commands_section = True
+                            continue
+                        elif in_commands_section and line.strip():
+                            # Look for command names (typically the first word after whitespace)
+                            parts = line.strip().split()
+                            if parts and not parts[0].startswith('-'):
+                                cmd = parts[0]
+                                if cmd not in ['usage:', 'positional', 'optional', 'options:']:
+                                    content += f"# {parts[1:] if len(parts) > 1 else ['Command description']}\n"
+                                    content += f"{script_name} {cmd}\n\n"
+                        elif in_commands_section and not line.strip():
+                            break
+                    
+                    content += "```\n\n"
+            else:
+                content += f"CLI command `{script_name}` found but help text unavailable.\n\n"
+                
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+            content += f"CLI command `{script_name}` found but help text unavailable.\n\n"
+    
+    content += f"For detailed help on any command, use `{cli_commands[0][0]} <command> --help`."
+    
+    return content
+
+# %% ../nbs/03_api_docs.ipynb 18
+def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
+                              include_structure: bool = True,  # Include project structure
+                              include_dependencies: bool = True, # Include module dependencies
+                              include_cli: bool = True,         # Include CLI reference
+                              include_modules: bool = True      # Include module documentation
+                              ) -> None:                        # Updates index.ipynb in place
+    "Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"
+    if index_path is None:
+        cfg = get_config()
+        index_path = cfg.nbs_path / "index.ipynb"
+    
+    # Read the existing notebook
+    nb = read_nb(index_path)
+    
+    # Define all section markers we want to manage
+    section_markers = []
+    if include_structure:
+        section_markers.append("## Project Structure")
+    if include_dependencies:
+        section_markers.append("## Module Dependencies") 
+    if include_cli:
+        section_markers.append("## CLI Reference")
+    if include_modules:
+        section_markers.append("## Module Overview")
+    
+    # Remove all existing managed sections
+    cells_to_keep = []
+    skip_until_next_section = False
+    current_skipping_marker = None
+    
+    for i, cell in enumerate(nb.cells):
+        if cell.cell_type == 'markdown':
+            source = cell.source.strip()
+            
+            # Check if this starts any of our managed sections
+            section_found = None
+            for marker in section_markers:
+                if source.startswith(marker):
+                    section_found = marker
+                    break
+            
+            if section_found:
+                skip_until_next_section = True
+                current_skipping_marker = section_found
+                continue
+            # Check if we've reached a new top-level section (## but not ### or more)
+            elif skip_until_next_section and re.match(r'^##\s+(?!#)', source):
+                # Make sure it's not another one of our managed sections
+                if not any(source.startswith(marker) for marker in section_markers):
+                    skip_until_next_section = False
+                    current_skipping_marker = None
+        
+        # Keep the cell if we're not in a managed section
+        if not skip_until_next_section:
+            cells_to_keep.append(cell)
+    
+    # Generate new content sections
+    new_sections = []
+    
+    if include_structure:
+        try:
+            structure_content = add_project_structure_section(index_path)
+            structure_cell = mk_cell(structure_content, cell_type='markdown')
+            new_sections.append(structure_cell)
+        except Exception as e:
+            print(f"Error generating project structure: {e}")
+    
+    if include_dependencies:
+        try:
+            deps_content = add_dependencies_section(index_path)
+            deps_cell = mk_cell(deps_content, cell_type='markdown')
+            new_sections.append(deps_cell)
+        except Exception as e:
+            print(f"Error generating dependencies: {e}")
+    
+    if include_cli:
+        try:
+            cli_content = add_cli_reference_section()
+            cli_cell = mk_cell(cli_content, cell_type='markdown')
+            new_sections.append(cli_cell)
+        except Exception as e:
+            print(f"Error generating CLI reference: {e}")
+    
+    if include_modules:
+        try:
+            # Generate module overview sections
+            notebooks = get_notebook_files(index_path.parent, recursive=True)
+            
+            # Create the module overview header cell
+            header_cell = mk_cell("## Module Overview\n\nDetailed documentation for each module in the project:", 
+                                 cell_type='markdown')
+            new_sections.append(header_cell)
+            
+            # Sort notebooks by their numeric prefix
+            def sort_key(
+                nb_path  # TODO: Add type hint and description
+            ): # TODO: Add type hint
+                "TODO: Add function description"
+                match = re.match(r'^(\d+)', nb_path.stem)
+                if match:
+                    return (int(match.group(1)), nb_path.stem)
+                return (999, nb_path.stem)
+            
+            sorted_notebooks = sorted(notebooks, key=sort_key)
+            
+            # Generate overview for each module
+            for nb_path in sorted_notebooks:
+                if nb_path.stem in ['index', '00_index']:
+                    continue
+                    
+                try:
+                    module_info = parse_notebook(nb_path)
+                    
+                    # Only include if it has exported content
+                    has_exports = any([
+                        any(f.is_exported for f in module_info.functions),
+                        any(c.is_exported for c in module_info.classes),
+                        any(v.is_exported for v in module_info.variables)
+                    ])
+                    
+                    if has_exports:
+                        overview_md = generate_module_overview(module_info)
+                        overview_cell = mk_cell(overview_md, cell_type='markdown')
+                        new_sections.append(overview_cell)
+                except Exception as e:
+                    print(f"Error parsing {nb_path}: {e}")
+                    continue
+        except Exception as e:
+            print(f"Error generating module documentation: {e}")
+    
+    # Rebuild the notebook with new sections at the end
+    nb.cells = cells_to_keep + new_sections
     
     # Write the updated notebook
     write_nb(nb, index_path)

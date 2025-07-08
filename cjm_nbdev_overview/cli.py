@@ -14,7 +14,7 @@ from .dependencies import *
 from .parsers import *
 
 # %% auto 0
-__all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'main']
+__all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'update_comprehensive_cmd', 'main']
 
 # %% ../nbs/06_cli.ipynb 5
 def tree_cmd(
@@ -223,7 +223,57 @@ def update_index_cmd(
         print(f"Error updating index: {e}", file=sys.stderr)
         sys.exit(1)
 
-# %% ../nbs/06_cli.ipynb 15
+# %% ../nbs/06_cli.ipynb 14
+def update_comprehensive_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Comprehensively update index.ipynb with all sections"
+    # Get index path
+    index_path = Path(args.index) if args.index else None
+    
+    try:
+        update_index_comprehensive(
+            index_path=index_path,
+            include_structure=not args.no_structure,
+            include_dependencies=not args.no_dependencies,
+            include_cli=not args.no_cli,
+            include_modules=not args.no_modules
+        )
+        
+        # Get the actual path that was updated
+        if index_path is None:
+            cfg = get_config()
+            index_path = cfg.nbs_path / "index.ipynb"
+        
+        sections = []
+        if not args.no_structure:
+            sections.append("project structure")
+        if not args.no_dependencies:
+            sections.append("module dependencies")
+        if not args.no_cli:
+            sections.append("CLI reference")
+        if not args.no_modules:
+            sections.append("module documentation")
+        
+        sections_str = ", ".join(sections)
+        print(f"Successfully updated {index_path} with {sections_str}")
+        
+        if args.commit:
+            # Stage and commit the changes
+            import subprocess
+            try:
+                subprocess.run(['git', 'add', str(index_path)], check=True)
+                subprocess.run(['git', 'commit', '-m', 'Comprehensive update of index.ipynb documentation'], check=True)
+                print("Changes committed to git")
+            except subprocess.CalledProcessError as e:
+                print(f"Git operations failed: {e}", file=sys.stderr)
+                sys.exit(1)
+                
+    except Exception as e:
+        print(f"Error updating index: {e}", file=sys.stderr)
+        sys.exit(1)
+
+# %% ../nbs/06_cli.ipynb 16
 def main(
 ): # TODO: Add type hint
     "Main CLI entry point for nbdev-overview"
@@ -276,6 +326,16 @@ def main(
     update_parser.add_argument('--index', help='Path to index.ipynb (defaults to nbs/index.ipynb)')
     update_parser.add_argument('--commit', action='store_true', help='Commit changes to git')
     update_parser.set_defaults(func=update_index_cmd)
+    
+    # Update comprehensive command
+    comprehensive_parser = subparsers.add_parser('update-comprehensive', help='Comprehensive update of index.ipynb with all sections')
+    comprehensive_parser.add_argument('--index', help='Path to index.ipynb (defaults to nbs/index.ipynb)')
+    comprehensive_parser.add_argument('--no-structure', action='store_true', help='Skip project structure section')
+    comprehensive_parser.add_argument('--no-dependencies', action='store_true', help='Skip module dependencies section')
+    comprehensive_parser.add_argument('--no-cli', action='store_true', help='Skip CLI reference section')
+    comprehensive_parser.add_argument('--no-modules', action='store_true', help='Skip module documentation section')
+    comprehensive_parser.add_argument('--commit', action='store_true', help='Commit changes to git')
+    comprehensive_parser.set_defaults(func=update_comprehensive_cmd)
     
     # Parse arguments
     args = parser.parse_args()
