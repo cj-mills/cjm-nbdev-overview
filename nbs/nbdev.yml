@@ -4,6 +4,6 @@ project:
 website:
   title: "cjm-nbdev-overview"
   site-url: "https://cj-mills.github.io/cjm-nbdev-overview"
-  description: "Generate comprehensive overviews, API references, and project structure visualizations for nbdev projects to enhance developer and AI assistant understanding."
+  description: "Automated documentation and visualization tools for nbdev projects."
   repo-branch: main
   repo-url: "https://github.com/cj-mills/cjm-nbdev-overview"
