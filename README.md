@@ -106,6 +106,19 @@ Detailed documentation for each module in the project:
 
 > Core utilities and data models for nbdev project overview generation
 
+#### Import
+
+``` python
+from cjm-nbdev-overview.core import (
+    NotebookInfo,
+    DirectoryInfo,
+    get_notebook_files,
+    get_subdirectories,
+    read_notebook,
+    get_cell_source
+)
+```
+
 #### Functions
 
 ``` python
@@ -158,6 +171,24 @@ class DirectoryInfo:
 
 > Parse notebook metadata, content, and extract function/class
 > signatures with docments
+
+#### Import
+
+``` python
+from cjm-nbdev-overview.parsers import (
+    FunctionInfo,
+    ClassInfo,
+    VariableInfo,
+    ModuleInfo,
+    extract_docments_signature,
+    parse_function,
+    parse_class,
+    parse_variable,
+    parse_code_cell,
+    parse_notebook,
+    parse_python_file
+)
+```
 
 #### Functions
 
@@ -240,6 +271,19 @@ class ModuleInfo:
 
 > Generate tree visualizations for nbdev project structure
 
+#### Import
+
+``` python
+from cjm-nbdev-overview.tree import (
+    generate_tree_lines,
+    generate_tree,
+    extract_notebook_info,
+    generate_tree_with_descriptions,
+    generate_subdirectory_tree,
+    get_tree_summary
+)
+```
+
 #### Functions
 
 ``` python
@@ -317,6 +361,23 @@ def get_tree_summary(path: Path = None              # Directory to analyze
 
 > Generate module overviews with formatted signatures for nbdev projects
 
+#### Import
+
+``` python
+from cjm-nbdev-overview.api_docs import (
+    format_function_doc,
+    format_class_doc,
+    format_variable_doc,
+    generate_module_overview,
+    generate_project_api_docs,
+    update_index_module_docs,
+    add_project_structure_section,
+    add_dependencies_section,
+    add_cli_reference_section,
+    update_index_comprehensive
+)
+```
+
 #### Functions
 
 ``` python
@@ -353,9 +414,34 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
 ```
 
 ``` python
-def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (defaults to nbs/index.ipynb)
-                           start_marker: str = "## Module Overview",  # Marker to identify module docs section
-                           ) -> None:                    # Updates index.ipynb in place
+def _filter_cells_removing_sections(cells: List,               # List of notebook cells
+                                   start_marker: str            # Section marker to remove
+                                   ) -> List:                   # Filtered cells
+    "Remove all cells from a section marked by start_marker until the next ## section"
+```
+
+``` python
+def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
+                             ) -> List[Path]:                   # Sorted notebook paths
+    "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
+```
+
+``` python
+def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
+                               ) -> List[Path]:                 # Notebooks with exported content
+    "Filter notebooks to only include those with exported content"
+```
+
+``` python
+def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
+                                   ) -> List:                   # List of notebook cells
+    "Generate markdown cells containing module overview documentation"
+```
+
+``` python
+def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
+                           start_marker: str = "## Module Overview"  # Marker to identify module docs section
+                           ) -> None:                          # Updates index.ipynb in place
     "Update the module documentation section in index.ipynb"
 ```
 
@@ -395,6 +481,20 @@ def update_index_comprehensive(index_path: Path = None,         # Path to index.
 
 > Analyze cross-notebook imports and generate Mermaid.js dependency
 > diagrams
+
+#### Import
+
+``` python
+from cjm-nbdev-overview.dependencies import (
+    ModuleDependency,
+    DependencyGraph,
+    extract_project_imports,
+    analyze_module_dependencies,
+    build_dependency_graph,
+    generate_mermaid_diagram,
+    generate_dependency_matrix
+)
+```
 
 #### Functions
 
@@ -472,6 +572,17 @@ class DependencyGraph:
 > Auto-generate folder_name.ipynb notebooks for nbdev project
 > organization
 
+#### Import
+
+``` python
+from cjm-nbdev-overview.generators import (
+    create_folder_notebook,
+    generate_folder_notebook,
+    generate_all_folder_notebooks,
+    interactive_folder_notebook_generator
+)
+```
+
 #### Functions
 
 ``` python
@@ -509,6 +620,20 @@ def interactive_folder_notebook_generator(base_path: Path = None  # Base path
 ### Command-Line Interface (`06_cli.ipynb`)
 
 > CLI commands for nbdev project overview generation and analysis
+
+#### Import
+
+``` python
+from cjm-nbdev-overview.cli import (
+    tree_cmd,
+    api_cmd,
+    deps_cmd,
+    overview_cmd,
+    update_index_cmd,
+    update_comprehensive_cmd,
+    main
+)
+```
 
 #### Functions
 

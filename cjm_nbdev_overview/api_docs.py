@@ -147,6 +147,79 @@ def generate_module_overview(module: ModuleInfo,        # Module information
     if module.description:
         lines.append(f"> {module.description}")
     
+    # Add import statements section
+    lines.append("\n#### Import\n")
+    
+    # Generate import statement based on the corresponding Python file
+    try:
+        from nbdev.config import get_config
+        cfg = get_config()
+        
+        # Construct the Python module path using the module name
+        python_module_path = cfg.lib_path / f"{module.name}.py"
+        
+        if python_module_path.exists():
+            # Read the Python file to extract __all__
+            with open(python_module_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Find the __all__ definition
+            import ast
+            try:
+                tree = ast.parse(content)
+                all_items = []
+                
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Assign):
+                        for target in node.targets:
+                            if isinstance(target, ast.Name) and target.id == '__all__':
+                                if isinstance(node.value, ast.List):
+                                    all_items = [
+                                        elt.s if isinstance(elt, ast.Str) else elt.value
+                                        for elt in node.value.elts
+                                        if isinstance(elt, (ast.Str, ast.Constant))
+                                    ]
+                                break
+                
+                if all_items:
+                    # Create import statement
+                    package_name = cfg.lib_name
+                    full_module_path = f"{package_name}.{module.name}"
+                    
+                    lines.append("```python")
+                    lines.append(f"from {full_module_path} import (")
+                    
+                    # Add each item on a separate line with proper formatting
+                    for i, item in enumerate(all_items):
+                        if i == len(all_items) - 1:
+                            lines.append(f"    {item}")
+                        else:
+                            lines.append(f"    {item},")
+                    
+                    lines.append(")")
+                    lines.append("```")
+                else:
+                    # Fallback if __all__ not found
+                    lines.append("```python")
+                    lines.append(f"from {cfg.lib_name}.{module.name} import *")
+                    lines.append("```")
+            
+            except Exception:
+                # Fallback if parsing fails
+                lines.append("```python")
+                lines.append(f"from {cfg.lib_name}.{module.name} import *")
+                lines.append("```")
+        else:
+            # Fallback if Python file doesn't exist
+            lines.append("```python")
+            lines.append(f"# No corresponding Python module found for {module.name}")
+            lines.append("```")
+    except Exception:
+        # Final fallback
+        lines.append("```python")
+        lines.append(f"# Import statements not available")
+        lines.append("```")
+    
     # Filter items based on show_all and is_exported
     if show_all:
         functions = module.functions
@@ -222,25 +295,17 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
     return '\n'.join(lines)
 
 # %% ../nbs/03_api_docs.ipynb 12
-def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (defaults to nbs/index.ipynb)
-                           start_marker: str = "## Module Overview",  # Marker to identify module docs section
-                           ) -> None:                    # Updates index.ipynb in place
-    "Update the module documentation section in index.ipynb"
-    if index_path is None:
-        cfg = get_config()
-        index_path = cfg.nbs_path / "index.ipynb"
-    
-    # Read the existing notebook
-    nb = read_nb(index_path)
-    
-    # Find all module overview sections and remove them
+def _filter_cells_removing_sections(cells: List,               # List of notebook cells
+                                   start_marker: str            # Section marker to remove
+                                   ) -> List:                   # Filtered cells
+    "Remove all cells from a section marked by start_marker until the next ## section"
     cells_to_keep = []
     skip_until_next_section = False
     
-    for i, cell in enumerate(nb.cells):
+    for cell in cells:
         if cell.cell_type == 'markdown':
             source = cell.source.strip()
-            # Check if this is the start of a module overview section
+            # Check if this is the start of a section to remove
             if source.startswith(start_marker):
                 skip_until_next_section = True
                 continue
@@ -248,33 +313,31 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
             elif skip_until_next_section and re.match(r'^##\s+(?!#)', source) and not source.startswith(start_marker):
                 skip_until_next_section = False
         
-        # Keep the cell if we're not in a module overview section
+        # Keep the cell if we're not in a section to remove
         if not skip_until_next_section:
             cells_to_keep.append(cell)
     
-    # Get all notebooks and parse them
-    notebooks = get_notebook_files(index_path.parent, recursive=True)
-    module_cells = []
-    
-    # Create the module overview header cell
-    header_cell = mk_cell(f"{start_marker}\n\nDetailed documentation for each module in the project:", 
-                         cell_type='markdown')
-    module_cells.append(header_cell)
-    
-    # Sort notebooks by their numeric prefix if they have one
-    def sort_key(
-        nb_path  # TODO: Add type hint and description
-    ): # TODO: Add type hint
-        "TODO: Add function description"
+    return cells_to_keep
+
+# %% ../nbs/03_api_docs.ipynb 13
+def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
+                             ) -> List[Path]:                   # Sorted notebook paths
+    "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
+    def sort_key(nb_path: Path) -> tuple:
         match = re.match(r'^(\d+)', nb_path.stem)
         if match:
             return (int(match.group(1)), nb_path.stem)
         return (999, nb_path.stem)  # Put non-numbered notebooks at the end
     
-    sorted_notebooks = sorted(notebooks, key=sort_key)
+    return sorted(notebooks, key=sort_key)
+
+# %% ../nbs/03_api_docs.ipynb 14
+def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
+                               ) -> List[Path]:                 # Notebooks with exported content
+    "Filter notebooks to only include those with exported content"
+    notebooks_with_exports = []
     
-    # Generate overview for each module
-    for nb_path in sorted_notebooks:
+    for nb_path in notebooks:
         # Skip index notebooks
         if nb_path.stem in ['index', '00_index']:
             continue
@@ -290,12 +353,59 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
             ])
             
             if has_exports:
-                overview_md = generate_module_overview(module_info)
-                overview_cell = mk_cell(overview_md, cell_type='markdown')
-                module_cells.append(overview_cell)
+                notebooks_with_exports.append(nb_path)
         except Exception as e:
             print(f"Error parsing {nb_path}: {e}")
             continue
+    
+    return notebooks_with_exports
+
+# %% ../nbs/03_api_docs.ipynb 15
+def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
+                                   ) -> List:                   # List of notebook cells
+    "Generate markdown cells containing module overview documentation"
+    module_cells = []
+    
+    # Create the module overview header cell
+    header_cell = mk_cell("## Module Overview\n\nDetailed documentation for each module in the project:", 
+                         cell_type='markdown')
+    module_cells.append(header_cell)
+    
+    # Generate overview for each module
+    for nb_path in notebooks:
+        try:
+            module_info = parse_notebook(nb_path)
+            overview_md = generate_module_overview(module_info)
+            overview_cell = mk_cell(overview_md, cell_type='markdown')
+            module_cells.append(overview_cell)
+        except Exception as e:
+            print(f"Error parsing {nb_path}: {e}")
+            continue
+    
+    return module_cells
+
+# %% ../nbs/03_api_docs.ipynb 16
+def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
+                           start_marker: str = "## Module Overview"  # Marker to identify module docs section
+                           ) -> None:                          # Updates index.ipynb in place
+    "Update the module documentation section in index.ipynb"
+    if index_path is None:
+        cfg = get_config()
+        index_path = cfg.nbs_path / "index.ipynb"
+    
+    # Read the existing notebook
+    nb = read_nb(index_path)
+    
+    # Filter out existing module overview sections
+    cells_to_keep = _filter_cells_removing_sections(nb.cells, start_marker)
+    
+    # Get all notebooks and process them
+    notebooks = get_notebook_files(index_path.parent, recursive=True)
+    sorted_notebooks = _sort_notebooks_by_prefix(notebooks)
+    notebooks_with_exports = _get_notebooks_with_exports(sorted_notebooks)
+    
+    # Generate new module overview cells
+    module_cells = _generate_module_overview_cells(notebooks_with_exports)
     
     # Rebuild the notebook with the new module overview at the end
     nb.cells = cells_to_keep + module_cells
@@ -303,7 +413,7 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
     # Write the updated notebook
     write_nb(nb, index_path)
 
-# %% ../nbs/03_api_docs.ipynb 15
+# %% ../nbs/03_api_docs.ipynb 19
 def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
                                  marker: str = "## Project Structure",  # Section marker
                                  exclude_index: bool = True     # Exclude index.ipynb from tree
@@ -330,7 +440,7 @@ def add_project_structure_section(index_path: Path = None,      # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 16
+# %% ../nbs/03_api_docs.ipynb 20
 def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
                            marker: str = "## Module Dependencies", # Section marker
                            direction: str = "LR"                # Diagram direction
@@ -364,7 +474,7 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 17
+# %% ../nbs/03_api_docs.ipynb 21
 import subprocess
 import importlib.util
 import argparse
@@ -444,7 +554,7 @@ def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 18
+# %% ../nbs/03_api_docs.ipynb 22
 def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
                               include_structure: bool = True,  # Include project structure
                               include_dependencies: bool = True, # Include module dependencies
