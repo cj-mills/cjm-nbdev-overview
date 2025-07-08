@@ -39,6 +39,7 @@ class ClassInfo:
     docstring: Optional[str] = None               # Class docstring
     methods: List[FunctionInfo] = field(default_factory=list)  # Class methods
     decorators: List[str] = field(default_factory=list)        # Class decorators
+    attributes: List[VariableInfo] = field(default_factory=list)  # Class attributes (for dataclasses)
     is_exported: bool = False                     # Has #| export
     source_line: Optional[int] = None             # Line number in source
 
@@ -166,6 +167,51 @@ def parse_class(node: ast.ClassDef,                    # AST class node
             method_info = parse_function(item, source_lines, is_exported)
             methods.append(method_info)
     
+    # Extract dataclass attributes if this is a dataclass
+    attributes = []
+    is_dataclass = 'dataclass' in decorators
+    
+    if is_dataclass:
+        for item in node.body:
+            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+                # This is a type-annotated attribute
+                attr_name = item.target.id
+                type_hint = ast.unparse(item.annotation) if hasattr(ast, 'unparse') else str(item.annotation)
+                
+                # Get the default value if present
+                default_value = None
+                if item.value:
+                    try:
+                        if isinstance(item.value, ast.Constant):
+                            default_value = repr(item.value.value)
+                        elif isinstance(item.value, ast.Call):
+                            # Handle field() calls
+                            if isinstance(item.value.func, ast.Name) and item.value.func.id == 'field':
+                                default_value = "field(...)"
+                            else:
+                                default_value = ast.unparse(item.value) if hasattr(ast, 'unparse') else "..."
+                        else:
+                            default_value = ast.unparse(item.value) if hasattr(ast, 'unparse') else "..."
+                    except:
+                        default_value = "..."
+                
+                # Get inline comment
+                comment = None
+                if item.lineno <= len(source_lines):
+                    line = source_lines[item.lineno - 1]
+                    comment_match = re.search(r'#\s*(.+)$', line)
+                    if comment_match:
+                        comment = comment_match.group(1).strip()
+                
+                attr_info = VariableInfo(
+                    name=attr_name,
+                    type_hint=type_hint,
+                    value=default_value,
+                    comment=comment,
+                    is_exported=is_exported
+                )
+                attributes.append(attr_info)
+    
     # Extract class signature (including __init__ if present)
     class_sig = f"class {node.name}"
     if node.bases:
@@ -190,6 +236,7 @@ def parse_class(node: ast.ClassDef,                    # AST class node
         docstring=docstring,
         methods=methods,
         decorators=decorators,
+        attributes=attributes,
         is_exported=is_exported,
         source_line=node.lineno
     )

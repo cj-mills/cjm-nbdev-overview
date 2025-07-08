@@ -83,6 +83,19 @@ def format_class_doc(cls: ClassInfo                     # Class information
                 lines.append(f'    {doc_line}')
             lines.append('    """')
     
+    # Add dataclass attributes if this is a dataclass
+    if 'dataclass' in cls.decorators and cls.attributes:
+        lines.append("    ")
+        for attr in cls.attributes:
+            attr_line = f"    {attr.name}"
+            if attr.type_hint:
+                attr_line += f": {attr.type_hint}"
+            if attr.value and attr.value != "None":
+                attr_line += f" = {attr.value}"
+            if attr.comment:
+                attr_line += f"  # {attr.comment}"
+            lines.append(attr_line)
+    
     # Add selected methods
     if cls.methods:
         lines.append("    ")
