@@ -222,7 +222,6 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
 # %% ../nbs/03_api_docs.ipynb 12
 def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (defaults to nbs/index.ipynb)
                            start_marker: str = "## Module Overview",  # Marker to identify module docs section
-                           end_marker: str = "## ",     # Next section marker
                            ) -> None:                    # Updates index.ipynb in place
     "Update the module documentation section in index.ipynb"
     if index_path is None:
@@ -232,20 +231,24 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
     # Read the existing notebook
     nb = read_nb(index_path)
     
-    # Find or create the module overview section
-    module_section_idx = None
-    end_section_idx = None
+    # Find all module overview sections and remove them
+    cells_to_keep = []
+    skip_until_next_section = False
     
     for i, cell in enumerate(nb.cells):
         if cell.cell_type == 'markdown':
-            source = cell.source
-            # Check if this is the module overview section
-            if start_marker in source:
-                module_section_idx = i
-            # Check if we've reached the next section after module overview
-            elif module_section_idx is not None and source.strip().startswith(end_marker):
-                end_section_idx = i
-                break
+            source = cell.source.strip()
+            # Check if this is the start of a module overview section
+            if source.startswith(start_marker):
+                skip_until_next_section = True
+                continue
+            # Check if we've reached a new top-level section (## but not ### or more)
+            elif skip_until_next_section and re.match(r'^##\s+(?!#)', source) and not source.startswith(start_marker):
+                skip_until_next_section = False
+        
+        # Keep the cell if we're not in a module overview section
+        if not skip_until_next_section:
+            cells_to_keep.append(cell)
     
     # Get all notebooks and parse them
     notebooks = get_notebook_files(index_path.parent, recursive=True)
@@ -257,10 +260,7 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
     module_cells.append(header_cell)
     
     # Sort notebooks by their numeric prefix if they have one
-    def sort_key(
-        nb_path  # TODO: Add type hint and description
-    ): # TODO: Add type hint
-        "TODO: Add function description"
+    def sort_key(nb_path):
         match = re.match(r'^(\d+)', nb_path.stem)
         if match:
             return (int(match.group(1)), nb_path.stem)
@@ -292,23 +292,8 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
             print(f"Error parsing {nb_path}: {e}")
             continue
     
-    # Now update the notebook
-    if module_section_idx is not None:
-        # Remove existing module documentation cells
-        if end_section_idx is not None:
-            # Remove cells from module_section_idx to end_section_idx (exclusive)
-            del nb.cells[module_section_idx:end_section_idx]
-        else:
-            # Remove from module_section_idx to end of notebook
-            del nb.cells[module_section_idx:]
-        
-        # Insert new module cells
-        for i, cell in enumerate(module_cells):
-            nb.cells.insert(module_section_idx + i, cell)
-    else:
-        # No module overview section found, append it
-        for cell in module_cells:
-            nb.cells.append(cell)
+    # Rebuild the notebook with the new module overview at the end
+    nb.cells = cells_to_keep + module_cells
     
     # Write the updated notebook
     write_nb(nb, index_path)

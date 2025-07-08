@@ -9,4 +9,3 @@ website:
       - 04_dependencies.ipynb
       - 05_generators.ipynb
       - 06_cli.ipynb
-      - 07_api.ipynb
