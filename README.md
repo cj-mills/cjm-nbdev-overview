@@ -110,8 +110,7 @@ nbdev-overview update-index
     ├── 03_api_docs.ipynb        # Generate module overviews with formatted signatures for nbdev projects
     ├── 04_dependencies.ipynb    # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
     ├── 05_generators.ipynb      # Auto-generate folder_name.ipynb notebooks for nbdev project organization
-    ├── 06_cli.ipynb             # CLI commands for nbdev project overview generation and analysis
-    └── index.ipynb              # Generate comprehensive overviews, API references, and project structure visualizations for nbdev projects to enhance developer and AI assistant understanding.
+    └── 06_cli.ipynb             # CLI commands for nbdev project overview generation and analysis
 
 Total: 8 notebooks
 
@@ -130,18 +129,18 @@ graph LR
     parsers --> core
     parsers --> tree
     tree --> core
-    api_docs --> parsers
     api_docs --> core
-    api_docs --> tree
+    api_docs --> parsers
     api_docs --> dependencies
+    api_docs --> tree
     dependencies --> core
     dependencies --> parsers
-    generators --> core
     generators --> tree
+    generators --> core
     cli --> tree
-    cli --> dependencies
     cli --> api_docs
     cli --> parsers
+    cli --> dependencies
 
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```
@@ -324,7 +323,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
                        is_last: bool = True,                # Is this the last item in parent
                        show_notebooks_only: bool = False,   # Only show notebooks, not directories
                        max_depth: Optional[int] = None,     # Maximum depth to traverse
-                       current_depth: int = 0               # Current depth in traversal
+                       current_depth: int = 0,              # Current depth in traversal
+                       exclude_index: bool = True           # Exclude index.ipynb from tree
                        ) -> List[str]:                      # Lines of tree output
     "Generate tree visualization lines for a directory"
 ```
@@ -332,7 +332,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
 ``` python
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
-                 max_depth: Optional[int] = None        # Maximum depth to traverse
+                 max_depth: Optional[int] = None,       # Maximum depth to traverse
+                 exclude_index: bool = True             # Exclude index.ipynb from tree
                  ) -> str:                              # Tree visualization as string
     "Generate a tree visualization for a directory"
 ```
@@ -346,7 +347,8 @@ def extract_notebook_info(path: Path                    # Path to notebook file
 ``` python
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
-                                   max_depth: Optional[int] = None  # Maximum depth to traverse
+                                   max_depth: Optional[int] = None, # Maximum depth to traverse
+                                   exclude_index: bool = True       # Exclude index.ipynb from tree
                                    ) -> str:                        # Tree with descriptions
     "Generate tree visualization with descriptions from notebooks"
 ```
@@ -356,7 +358,8 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
                                prefix: str = "",                    # Line prefix
                                show_counts: bool = True,            # Show notebook counts
                                max_depth: Optional[int] = None,     # Maximum depth
-                               current_depth: int = 0               # Current depth
+                               current_depth: int = 0,              # Current depth
+                               exclude_index: bool = True           # Exclude index.ipynb from tree
                                ) -> List[str]:                      # Tree lines
     "Generate tree lines for nested directory structure"
 ```
@@ -433,7 +436,8 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
 
 ``` python
 def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
-                                 marker: str = "## Project Structure"  # Section marker
+                                 marker: str = "## Project Structure",  # Section marker
+                                 exclude_index: bool = True     # Exclude index.ipynb from tree
                                  ) -> str:                       # Generated structure content
     "Generate project structure tree content for index.ipynb"
 ```
@@ -584,9 +588,15 @@ def interactive_folder_notebook_generator(base_path: Path = None  # Base path
 #### Functions
 
 ``` python
-def tree_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def tree_cmd(args):                                     # Command line arguments
+    "Generate tree visualization for nbdev project"
+    # Get project path
+    path = Path(args.path) if args.path else None
+    
+    # Determine exclude_index flag (default True, but --include-index overrides)
+    exclude_index = not getattr(args, 'include_index', False)
+    
+    if args.basic
     "Generate tree visualization for nbdev project"
 ```
 
@@ -626,7 +636,6 @@ def update_comprehensive_cmd(
 ```
 
 ``` python
-def main(
-): # TODO: Add type hint
+def main()
     "Main CLI entry point for nbdev-overview"
 ```

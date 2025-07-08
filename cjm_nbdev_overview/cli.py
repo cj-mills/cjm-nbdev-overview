@@ -17,19 +17,20 @@ from .parsers import *
 __all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'update_comprehensive_cmd', 'main']
 
 # %% ../nbs/06_cli.ipynb 5
-def tree_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def tree_cmd(args):                                     # Command line arguments
     "Generate tree visualization for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
     
+    # Determine exclude_index flag (default True, but --include-index overrides)
+    exclude_index = not getattr(args, 'include_index', False)
+    
     if args.basic:
         # Basic tree without descriptions
-        print(generate_tree(path, show_notebooks_only=args.notebooks_only))
+        print(generate_tree(path, show_notebooks_only=args.notebooks_only, exclude_index=exclude_index))
     else:
         # Tree with descriptions
-        print(generate_tree_with_descriptions(path))
+        print(generate_tree_with_descriptions(path, exclude_index=exclude_index))
     
     # Show summary if requested
     if args.summary:
@@ -274,8 +275,7 @@ def update_comprehensive_cmd(
         sys.exit(1)
 
 # %% ../nbs/06_cli.ipynb 16
-def main(
-): # TODO: Add type hint
+def main():
     "Main CLI entry point for nbdev-overview"
     parser = argparse.ArgumentParser(
         prog='nbdev-overview',
@@ -291,6 +291,7 @@ def main(
     tree_parser.add_argument('--notebooks-only', action='store_true', help='Show only notebooks, not directories')
     tree_parser.add_argument('--summary', action='store_true', help='Include summary statistics')
     tree_parser.add_argument('--subdir', help='Generate tree for specific subdirectory')
+    tree_parser.add_argument('--include-index', action='store_true', help='Include index.ipynb in tree (excluded by default)')
     tree_parser.set_defaults(func=tree_cmd)
     
     # API command

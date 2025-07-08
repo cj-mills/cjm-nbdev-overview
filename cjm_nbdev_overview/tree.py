@@ -20,60 +20,57 @@ def generate_tree_lines(path: Path,                         # Directory to visua
                        is_last: bool = True,                # Is this the last item in parent
                        show_notebooks_only: bool = False,   # Only show notebooks, not directories
                        max_depth: Optional[int] = None,     # Maximum depth to traverse
-                       current_depth: int = 0               # Current depth in traversal
+                       current_depth: int = 0,              # Current depth in traversal
+                       exclude_index: bool = True           # Exclude index.ipynb from tree
                        ) -> List[str]:                      # Lines of tree output
     "Generate tree visualization lines for a directory"
     lines = []
     
-    # Skip if we've reached max depth
-    if max_depth is not None and current_depth > max_depth:
+    # Check depth limit
+    if max_depth is not None and current_depth >= max_depth:
         return lines
     
-    # Get items to display
-    items = []
-    
-    if not show_notebooks_only:
-        # Get subdirectories
-        subdirs = get_subdirectories(path, recursive=False)
-        items.extend([(d, True) for d in subdirs])
-    
-    # Get notebooks in this directory
+    # Get items to process
+    subdirs = sorted([d for d in path.iterdir() if d.is_dir()])
     notebooks = get_notebook_files(path, recursive=False)
-    items.extend([(n, False) for n in notebooks])
     
-    # Sort items by name
-    items.sort(key=lambda x: x[0].name.lower())
+    # Filter out index.ipynb if exclude_index is True
+    if exclude_index:
+        notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
+    
+    # Combine items based on show_notebooks_only
+    if show_notebooks_only:
+        items = [(nb, 'file') for nb in notebooks]
+    else:
+        items = [(d, 'dir') for d in subdirs] + [(nb, 'file') for nb in notebooks]
     
     # Generate lines for each item
-    for i, (item, is_dir) in enumerate(items):
+    for i, (item, item_type) in enumerate(items):
         is_last_item = (i == len(items) - 1)
+        connector = "└── " if is_last_item else "├── "
         
-        # Determine the box drawing character
-        if is_last_item:
-            connector = "└── "
-            extension = "    "
-        else:
-            connector = "├── "
-            extension = "│   "
-        
-        # Add the item name
-        lines.append(f"{prefix}{connector}{item.name}")
-        
-        # Recursively process directories
-        if is_dir and not show_notebooks_only:
-            child_prefix = prefix + extension
+        if item_type == 'dir':
+            # Directory line
+            lines.append(f"{prefix}{connector}{item.name}/")
+            
+            # Recursive call for subdirectory
+            next_prefix = prefix + ("    " if is_last_item else "│   ")
             child_lines = generate_tree_lines(
-                item, child_prefix, is_last_item, 
-                show_notebooks_only, max_depth, current_depth + 1
+                item, next_prefix, is_last_item, show_notebooks_only, 
+                max_depth, current_depth + 1, exclude_index
             )
             lines.extend(child_lines)
+        else:
+            # Notebook file line
+            lines.append(f"{prefix}{connector}{item.name}")
     
     return lines
 
 # %% ../nbs/02_tree.ipynb 6
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
-                 max_depth: Optional[int] = None        # Maximum depth to traverse
+                 max_depth: Optional[int] = None,       # Maximum depth to traverse
+                 exclude_index: bool = True             # Exclude index.ipynb from tree
                  ) -> str:                              # Tree visualization as string
     "Generate a tree visualization for a directory"
     if path is None:
@@ -84,7 +81,7 @@ def generate_tree(path: Path = None,                    # Directory to visualize
     lines = [f"{path.name}/"]
     
     # Generate tree lines
-    tree_lines = generate_tree_lines(path, "", True, show_notebooks_only, max_depth)
+    tree_lines = generate_tree_lines(path, "", True, show_notebooks_only, max_depth, 0, exclude_index)
     lines.extend(tree_lines)
     
     return '\n'.join(lines)
@@ -152,7 +149,8 @@ def extract_notebook_info(path: Path                    # Path to notebook file
 # %% ../nbs/02_tree.ipynb 13
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
-                                   max_depth: Optional[int] = None  # Maximum depth to traverse
+                                   max_depth: Optional[int] = None, # Maximum depth to traverse
+                                   exclude_index: bool = True       # Exclude index.ipynb from tree
                                    ) -> str:                        # Tree with descriptions
     "Generate tree visualization with descriptions from notebooks"
     if path is None:
@@ -169,6 +167,10 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
         # Flat structure - show notebooks with descriptions
         lines.append(f"{path.name}/")
         notebooks = get_notebook_files(path, recursive=False)
+        
+        # Filter out index.ipynb if exclude_index is True
+        if exclude_index:
+            notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
         
         for i, nb_path in enumerate(notebooks):
             is_last = (i == len(notebooks) - 1)
@@ -187,7 +189,7 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
     else:
         # Nested structure - show directories with counts and descriptions
         lines.append(f"{path.name}/")
-        lines.extend(_generate_nested_tree_lines(path, "", show_counts, max_depth))
+        lines.extend(_generate_nested_tree_lines(path, "", show_counts, max_depth, 0, exclude_index))
     
     return '\n'.join(lines)
 
@@ -196,54 +198,75 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
                                prefix: str = "",                    # Line prefix
                                show_counts: bool = True,            # Show notebook counts
                                max_depth: Optional[int] = None,     # Maximum depth
-                               current_depth: int = 0               # Current depth
+                               current_depth: int = 0,              # Current depth
+                               exclude_index: bool = True           # Exclude index.ipynb from tree
                                ) -> List[str]:                      # Tree lines
     "Generate tree lines for nested directory structure"
     lines = []
     
+    # Check depth limit
     if max_depth is not None and current_depth >= max_depth:
         return lines
     
-    # Get subdirectories
+    # Get subdirectories and notebooks
     subdirs = get_subdirectories(path, recursive=False)
-    subdirs.sort(key=lambda x: x.name.lower())
+    notebooks = get_notebook_files(path, recursive=False)
     
-    for i, subdir in enumerate(subdirs):
-        is_last = (i == len(subdirs) - 1)
+    # Filter out index.ipynb if exclude_index is True
+    if exclude_index:
+        notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
+    
+    # Combine and sort all items
+    all_items = []
+    
+    # Add subdirectories
+    for subdir in subdirs:
+        all_nb_files = get_notebook_files(subdir, recursive=True)
+        # Filter out index.ipynb from counts if exclude_index is True
+        if exclude_index:
+            all_nb_files = [nb for nb in all_nb_files if nb.name not in ['index.ipynb', '00_index.ipynb']]
+        
+        notebook_count = len(all_nb_files)
+        
+        if show_counts and notebook_count > 0:
+            all_items.append((subdir, 'dir', f"({notebook_count})"))
+        else:
+            all_items.append((subdir, 'dir', ""))
+    
+    # Add notebooks in current directory
+    for nb_path in notebooks:
+        nb_info = extract_notebook_info(nb_path)
+        if nb_info.description:
+            all_items.append((nb_path, 'file', f"# {nb_info.description}"))
+        else:
+            all_items.append((nb_path, 'file', ""))
+    
+    # Generate lines for each item
+    for i, (item, item_type, annotation) in enumerate(all_items):
+        is_last = (i == len(all_items) - 1)
         connector = "└── " if is_last else "├── "
-        extension = "    " if is_last else "│   "
         
-        # Count notebooks in this directory (recursive)
-        notebook_count = len(get_notebook_files(subdir, recursive=True))
-        
-        # Look for folder description from folder_name.ipynb
-        folder_nb_path = subdir / f"{subdir.name}.ipynb"
-        description = None
-        if folder_nb_path.exists():
-            nb_info = extract_notebook_info(folder_nb_path)
-            description = nb_info.description
-        
-        # Format the line
-        line_parts = [f"{prefix}{connector}{subdir.name}/"]
-        
-        if show_counts:
-            count_str = f"{notebook_count} notebook{'s' if notebook_count != 1 else ''}"
-            line_parts[0] = line_parts[0].ljust(28) + f" # {count_str}"
+        if item_type == 'dir':
+            # Directory with count
+            dir_line = f"{prefix}{connector}{item.name}/"
+            if annotation:
+                dir_line += f" {annotation}"
+            lines.append(dir_line)
             
-            if description:
-                line_parts[0] += f" - {description}"
-        elif description:
-            line_parts[0] = line_parts[0].ljust(28) + f" # {description}"
-        
-        lines.append(line_parts[0])
-        
-        # Recursively process subdirectories
-        if max_depth is None or current_depth + 1 < max_depth:
+            # Recurse into subdirectory
+            next_prefix = prefix + ("    " if is_last else "│   ")
             child_lines = _generate_nested_tree_lines(
-                subdir, prefix + extension, show_counts, 
-                max_depth, current_depth + 1
+                item, next_prefix, show_counts, max_depth, 
+                current_depth + 1, exclude_index
             )
             lines.extend(child_lines)
+        else:
+            # Notebook file
+            nb_line = f"{prefix}{connector}{item.name}"
+            if annotation:
+                # Pad the filename to align descriptions
+                nb_line = nb_line.ljust(len(prefix) + 28) + f" {annotation}"
+            lines.append(nb_line)
     
     return lines
 

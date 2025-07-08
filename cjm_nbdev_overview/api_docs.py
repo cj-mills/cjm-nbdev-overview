@@ -305,7 +305,8 @@ def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (d
 
 # %% ../nbs/03_api_docs.ipynb 15
 def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
-                                 marker: str = "## Project Structure"  # Section marker
+                                 marker: str = "## Project Structure",  # Section marker
+                                 exclude_index: bool = True     # Exclude index.ipynb from tree
                                  ) -> str:                       # Generated structure content
     "Generate project structure tree content for index.ipynb"
     if index_path is None:
@@ -315,7 +316,7 @@ def add_project_structure_section(index_path: Path = None,      # Path to index.
         path = index_path.parent
     
     # Generate tree with descriptions
-    tree_content = generate_tree_with_descriptions(path)
+    tree_content = generate_tree_with_descriptions(path, exclude_index=exclude_index)
     
     # Get summary statistics
     summary = get_tree_summary(path)
