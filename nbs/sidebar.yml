@@ -1,0 +1,12 @@
+website:
+  sidebar:
+    contents:
+      - index.ipynb
+      - 00_core.ipynb
+      - 01_parsers.ipynb
+      - 02_tree.ipynb
+      - 03_api_docs.ipynb
+      - 04_dependencies.ipynb
+      - 05_generators.ipynb
+      - 06_cli.ipynb
+      - 07_api.ipynb
