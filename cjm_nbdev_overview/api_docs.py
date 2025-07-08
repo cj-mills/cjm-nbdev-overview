@@ -13,9 +13,13 @@ from .tree import *
 from dataclasses import dataclass
 import textwrap
 
+from execnb.nbio import read_nb, write_nb, mk_cell, new_nb
+from fastcore.xtras import Path
+import re
+
 # %% auto 0
 __all__ = ['format_function_doc', 'format_class_doc', 'format_variable_doc', 'generate_module_overview',
-           'generate_project_api_docs']
+           'generate_project_api_docs', 'update_index_module_docs']
 
 # %% ../nbs/03_api_docs.ipynb 5
 def format_function_doc(func: FunctionInfo,             # Function information
@@ -214,3 +218,97 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
             continue
     
     return '\n'.join(lines)
+
+# %% ../nbs/03_api_docs.ipynb 12
+def update_index_module_docs(index_path: Path = None,   # Path to index.ipynb (defaults to nbs/index.ipynb)
+                           start_marker: str = "## Module Overview",  # Marker to identify module docs section
+                           end_marker: str = "## ",     # Next section marker
+                           ) -> None:                    # Updates index.ipynb in place
+    "Update the module documentation section in index.ipynb"
+    if index_path is None:
+        cfg = get_config()
+        index_path = cfg.nbs_path / "index.ipynb"
+    
+    # Read the existing notebook
+    nb = read_nb(index_path)
+    
+    # Find or create the module overview section
+    module_section_idx = None
+    end_section_idx = None
+    
+    for i, cell in enumerate(nb.cells):
+        if cell.cell_type == 'markdown':
+            source = cell.source
+            # Check if this is the module overview section
+            if start_marker in source:
+                module_section_idx = i
+            # Check if we've reached the next section after module overview
+            elif module_section_idx is not None and source.strip().startswith(end_marker):
+                end_section_idx = i
+                break
+    
+    # Get all notebooks and parse them
+    notebooks = get_notebook_files(index_path.parent, recursive=True)
+    module_cells = []
+    
+    # Create the module overview header cell
+    header_cell = mk_cell(f"{start_marker}\n\nDetailed documentation for each module in the project:", 
+                         cell_type='markdown')
+    module_cells.append(header_cell)
+    
+    # Sort notebooks by their numeric prefix if they have one
+    def sort_key(
+        nb_path  # TODO: Add type hint and description
+    ): # TODO: Add type hint
+        "TODO: Add function description"
+        match = re.match(r'^(\d+)', nb_path.stem)
+        if match:
+            return (int(match.group(1)), nb_path.stem)
+        return (999, nb_path.stem)  # Put non-numbered notebooks at the end
+    
+    sorted_notebooks = sorted(notebooks, key=sort_key)
+    
+    # Generate overview for each module
+    for nb_path in sorted_notebooks:
+        # Skip index notebooks
+        if nb_path.stem in ['index', '00_index']:
+            continue
+            
+        try:
+            module_info = parse_notebook(nb_path)
+            
+            # Only include if it has exported content
+            has_exports = any([
+                any(f.is_exported for f in module_info.functions),
+                any(c.is_exported for c in module_info.classes),
+                any(v.is_exported for v in module_info.variables)
+            ])
+            
+            if has_exports:
+                overview_md = generate_module_overview(module_info)
+                overview_cell = mk_cell(overview_md, cell_type='markdown')
+                module_cells.append(overview_cell)
+        except Exception as e:
+            print(f"Error parsing {nb_path}: {e}")
+            continue
+    
+    # Now update the notebook
+    if module_section_idx is not None:
+        # Remove existing module documentation cells
+        if end_section_idx is not None:
+            # Remove cells from module_section_idx to end_section_idx (exclusive)
+            del nb.cells[module_section_idx:end_section_idx]
+        else:
+            # Remove from module_section_idx to end of notebook
+            del nb.cells[module_section_idx:]
+        
+        # Insert new module cells
+        for i, cell in enumerate(module_cells):
+            nb.cells.insert(module_section_idx + i, cell)
+    else:
+        # No module overview section found, append it
+        for cell in module_cells:
+            nb.cells.append(cell)
+    
+    # Write the updated notebook
+    write_nb(nb, index_path)

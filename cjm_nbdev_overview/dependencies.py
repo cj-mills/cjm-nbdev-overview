@@ -33,11 +33,17 @@ class DependencyGraph:
     modules: Dict[str, ModuleInfo] = field(default_factory=dict)  # Module name -> ModuleInfo
     dependencies: List[ModuleDependency] = field(default_factory=list)  # All dependencies
     
-    def add_module(self, module: ModuleInfo):  # Add a module to the graph
+    def add_module(
+        self,
+        module: ModuleInfo  # TODO: Add description
+    ): # Add a module to the graph - TODO: Add type hint
         "Add a module to the dependency graph"
         self.modules[module.name] = module
     
-    def add_dependency(self, dep: ModuleDependency):  # Add a dependency
+    def add_dependency(
+        self,
+        dep: ModuleDependency  # TODO: Add description
+    ): # Add a dependency - TODO: Add type hint
         "Add a dependency to the graph"
         self.dependencies.append(dep)
     

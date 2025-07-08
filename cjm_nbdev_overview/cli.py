@@ -14,10 +14,12 @@ from .dependencies import *
 from .parsers import *
 
 # %% auto 0
-__all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'main']
+__all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'main']
 
 # %% ../nbs/06_cli.ipynb 5
-def tree_cmd(args):                                     # Command line arguments
+def tree_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Generate tree visualization for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -48,7 +50,9 @@ def tree_cmd(args):                                     # Command line arguments
             sys.exit(1)
 
 # %% ../nbs/06_cli.ipynb 7
-def api_cmd(args):                                      # Command line arguments
+def api_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Generate API documentation for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -87,7 +91,9 @@ def api_cmd(args):                                      # Command line arguments
             print(api_docs)
 
 # %% ../nbs/06_cli.ipynb 9
-def deps_cmd(args):                                     # Command line arguments
+def deps_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Analyze and visualize module dependencies"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -141,7 +147,9 @@ def deps_cmd(args):                                     # Command line arguments
             print(diagram)
 
 # %% ../nbs/06_cli.ipynb 11
-def overview_cmd(args):                                 # Command line arguments
+def overview_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Generate complete project overview"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -183,7 +191,41 @@ def overview_cmd(args):                                 # Command line arguments
         print(overview)
 
 # %% ../nbs/06_cli.ipynb 13
-def main():
+def update_index_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Update index.ipynb with module documentation"
+    # Get index path
+    index_path = Path(args.index) if args.index else None
+    
+    try:
+        update_index_module_docs(index_path)
+        
+        # Get the actual path that was updated
+        if index_path is None:
+            cfg = get_config()
+            index_path = cfg.nbs_path / "index.ipynb"
+        
+        print(f"Successfully updated {index_path} with module documentation")
+        
+        if args.commit:
+            # Stage and commit the changes
+            import subprocess
+            try:
+                subprocess.run(['git', 'add', str(index_path)], check=True)
+                subprocess.run(['git', 'commit', '-m', 'Update index.ipynb module documentation'], check=True)
+                print("Changes committed to git")
+            except subprocess.CalledProcessError as e:
+                print(f"Git operations failed: {e}", file=sys.stderr)
+                sys.exit(1)
+                
+    except Exception as e:
+        print(f"Error updating index: {e}", file=sys.stderr)
+        sys.exit(1)
+
+# %% ../nbs/06_cli.ipynb 15
+def main(
+): # TODO: Add type hint
     "Main CLI entry point for nbdev-overview"
     parser = argparse.ArgumentParser(
         prog='nbdev-overview',
@@ -228,6 +270,12 @@ def main():
     overview_parser.add_argument('--all', action='store_true', help='Include all items in API docs')
     overview_parser.add_argument('-o', '--output', help='Output file path')
     overview_parser.set_defaults(func=overview_cmd)
+    
+    # Update index command
+    update_parser = subparsers.add_parser('update-index', help='Update index.ipynb with module documentation')
+    update_parser.add_argument('--index', help='Path to index.ipynb (defaults to nbs/index.ipynb)')
+    update_parser.add_argument('--commit', action='store_true', help='Commit changes to git')
+    update_parser.set_defaults(func=update_index_cmd)
     
     # Parse arguments
     args = parser.parse_args()

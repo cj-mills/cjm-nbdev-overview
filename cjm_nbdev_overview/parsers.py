@@ -258,7 +258,7 @@ def parse_variable(node: Union[ast.Assign, ast.AnnAssign],    # AST assignment n
 
 # %% ../nbs/01_parsers.ipynb 15
 def parse_code_cell(cell: Dict[str, Any]                       # Notebook code cell
-                   ) -> Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:
+                   ) -> Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:  # TODO: Add return description
     "Parse a notebook code cell for functions, classes, variables, and imports"
     source = get_cell_source(cell)
     source_lines = source.split('\n')
