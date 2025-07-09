@@ -199,8 +199,8 @@ def _generate_import_statement(module: ModuleInfo       # Module information
                                 break
                 
                 if all_items:
-                    # Create import statement
-                    package_name = cfg.lib_name
+                    # Create import statement - replace hyphens with underscores for valid Python imports
+                    package_name = cfg.lib_name.replace('-', '_')
                     full_module_path = f"{package_name}.{module.name}"
                     
                     lines.append("```python")
@@ -216,15 +216,17 @@ def _generate_import_statement(module: ModuleInfo       # Module information
                     lines.append(")")
                     lines.append("```")
                 else:
-                    # Fallback if __all__ not found
+                    # Fallback if __all__ not found - replace hyphens with underscores
+                    package_name = cfg.lib_name.replace('-', '_')
                     lines.append("```python")
-                    lines.append(f"from {cfg.lib_name}.{module.name} import *")
+                    lines.append(f"from {package_name}.{module.name} import *")
                     lines.append("```")
             
             except Exception:
-                # Fallback if parsing fails
+                # Fallback if parsing fails - replace hyphens with underscores
+                package_name = cfg.lib_name.replace('-', '_')
                 lines.append("```python")
-                lines.append(f"from {cfg.lib_name}.{module.name} import *")
+                lines.append(f"from {package_name}.{module.name} import *")
                 lines.append("```")
         else:
             # Fallback if Python file doesn't exist

@@ -109,7 +109,7 @@ Detailed documentation for each module in the project:
 #### Import
 
 ``` python
-from cjm-nbdev-overview.core import (
+from cjm_nbdev_overview.core import (
     NotebookInfo,
     DirectoryInfo,
     get_notebook_files,
@@ -188,7 +188,7 @@ class DirectoryInfo:
 #### Import
 
 ``` python
-from cjm-nbdev-overview.parsers import (
+from cjm_nbdev_overview.parsers import (
     FunctionInfo,
     VariableInfo,
     ClassInfo,
@@ -347,7 +347,7 @@ class ModuleInfo:
 #### Import
 
 ``` python
-from cjm-nbdev-overview.tree import (
+from cjm_nbdev_overview.tree import (
     generate_tree_lines,
     generate_tree,
     extract_notebook_info,
@@ -437,7 +437,7 @@ def get_tree_summary(path: Path = None              # Directory to analyze
 #### Import
 
 ``` python
-from cjm-nbdev-overview.api_docs import (
+from cjm_nbdev_overview.api_docs import (
     format_function_doc,
     format_class_doc,
     format_variable_doc,
@@ -595,7 +595,7 @@ def update_index_comprehensive(index_path: Path = None,         # Path to index.
 #### Import
 
 ``` python
-from cjm-nbdev-overview.dependencies import (
+from cjm_nbdev_overview.dependencies import (
     ModuleDependency,
     DependencyGraph,
     extract_project_imports,
@@ -693,7 +693,7 @@ class DependencyGraph:
 #### Import
 
 ``` python
-from cjm-nbdev-overview.generators import (
+from cjm_nbdev_overview.generators import (
     create_folder_notebook,
     generate_folder_notebook,
     generate_all_folder_notebooks,
@@ -742,7 +742,7 @@ def interactive_folder_notebook_generator(base_path: Path = None  # Base path
 #### Import
 
 ``` python
-from cjm-nbdev-overview.cli import (
+from cjm_nbdev_overview.cli import (
     tree_cmd,
     api_cmd,
     deps_cmd,
