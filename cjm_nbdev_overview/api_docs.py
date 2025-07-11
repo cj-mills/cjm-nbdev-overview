@@ -96,13 +96,13 @@ def format_class_doc(cls: ClassInfo                     # Class information
                 attr_line += f"  # {attr.comment}"
             lines.append(attr_line)
     
-    # Add selected methods
+    # Add all methods
     if cls.methods:
         lines.append("    ")
         # Show __init__ and public methods only
         shown_methods = [m for m in cls.methods if not m.name.startswith('_') or m.name == '__init__']
         
-        for i, method in enumerate(shown_methods[:5]):  # Limit to first 5 methods
+        for i, method in enumerate(shown_methods):  # Show all methods, no truncation
             if i > 0:
                 lines.append("    ")
             
@@ -118,9 +118,6 @@ def format_class_doc(cls: ClassInfo                     # Class information
             # Add method docstring
             if method.docstring:
                 lines.append(f'        "{method.docstring.strip()}"')
-        
-        if len(shown_methods) > 5:
-            lines.append("        ...")
     
     lines.append("```")
     
@@ -269,6 +266,7 @@ def _generate_functions_section(functions: List[FunctionInfo]   # List of functi
             lines.append("")
     return lines
 
+# %% ../nbs/03_api_docs.ipynb 13
 def _generate_classes_section(classes: List[ClassInfo]          # List of classes
                             ) -> List[str]:                     # Section lines
     "Generate the classes section of module documentation"
@@ -280,6 +278,7 @@ def _generate_classes_section(classes: List[ClassInfo]          # List of classe
             lines.append("")
     return lines
 
+# %% ../nbs/03_api_docs.ipynb 14
 def _generate_variables_section(variables: List[VariableInfo]   # List of variables
                               ) -> List[str]:                   # Section lines
     "Generate the variables section of module documentation"
@@ -292,7 +291,7 @@ def _generate_variables_section(variables: List[VariableInfo]   # List of variab
         lines.append("```")
     return lines
 
-# %% ../nbs/03_api_docs.ipynb 13
+# %% ../nbs/03_api_docs.ipynb 15
 def generate_module_overview(module: ModuleInfo,        # Module information
                            show_all: bool = False       # Show all items including private
                            ) -> str:                    # Module overview markdown
@@ -315,7 +314,7 @@ def generate_module_overview(module: ModuleInfo,        # Module information
     
     return '\n'.join(lines)
 
-# %% ../nbs/03_api_docs.ipynb 14
+# %% ../nbs/03_api_docs.ipynb 16
 def generate_project_api_docs(path: Path = None,        # Project path (defaults to nbs_path)
                             show_all: bool = False      # Show all items including private
                             ) -> str:                   # Full API documentation
@@ -333,7 +332,7 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
     # Parse and document each notebook
     for nb_path in notebooks:
         # Skip index notebooks
-        if nb_path.stem in ['index', '00_index']:
+        if nb_path.stem in ['index']:
             continue
             
         try:
@@ -355,7 +354,7 @@ def generate_project_api_docs(path: Path = None,        # Project path (defaults
     
     return '\n'.join(lines)
 
-# %% ../nbs/03_api_docs.ipynb 16
+# %% ../nbs/03_api_docs.ipynb 18
 def _filter_cells_removing_sections(cells: List,               # List of notebook cells
                                    start_marker: str            # Section marker to remove
                                    ) -> List:                   # Filtered cells
@@ -380,7 +379,7 @@ def _filter_cells_removing_sections(cells: List,               # List of noteboo
     
     return cells_to_keep
 
-# %% ../nbs/03_api_docs.ipynb 17
+# %% ../nbs/03_api_docs.ipynb 19
 def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
                              ) -> List[Path]:                   # Sorted notebook paths
     "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
@@ -392,7 +391,7 @@ def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebo
     
     return sorted(notebooks, key=sort_key)
 
-# %% ../nbs/03_api_docs.ipynb 18
+# %% ../nbs/03_api_docs.ipynb 20
 def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
                                ) -> List[Path]:                 # Notebooks with exported content
     "Filter notebooks to only include those with exported content"
@@ -421,7 +420,7 @@ def _get_notebooks_with_exports(notebooks: List[Path]          # List of noteboo
     
     return notebooks_with_exports
 
-# %% ../nbs/03_api_docs.ipynb 19
+# %% ../nbs/03_api_docs.ipynb 21
 def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
                                    ) -> List:                   # List of notebook cells
     "Generate markdown cells containing module overview documentation"
@@ -445,7 +444,7 @@ def _generate_module_overview_cells(notebooks: List[Path]      # List of noteboo
     
     return module_cells
 
-# %% ../nbs/03_api_docs.ipynb 20
+# %% ../nbs/03_api_docs.ipynb 22
 def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
                            start_marker: str = "## Module Overview"  # Marker to identify module docs section
                            ) -> None:                          # Updates index.ipynb in place
@@ -474,7 +473,7 @@ def update_index_module_docs(index_path: Path = None,          # Path to index.i
     # Write the updated notebook
     write_nb(nb, index_path)
 
-# %% ../nbs/03_api_docs.ipynb 23
+# %% ../nbs/03_api_docs.ipynb 25
 def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
                                  marker: str = "## Project Structure",  # Section marker
                                  exclude_index: bool = True     # Exclude index.ipynb from tree
@@ -501,7 +500,7 @@ def add_project_structure_section(index_path: Path = None,      # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 24
+# %% ../nbs/03_api_docs.ipynb 26
 def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
                            marker: str = "## Module Dependencies", # Section marker
                            direction: str = "LR"                # Diagram direction
@@ -537,7 +536,7 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 25
+# %% ../nbs/03_api_docs.ipynb 27
 import subprocess
 import importlib.util
 import argparse
@@ -617,7 +616,7 @@ def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
     
     return content
 
-# %% ../nbs/03_api_docs.ipynb 26
+# %% ../nbs/03_api_docs.ipynb 28
 def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
                               include_structure: bool = True,  # Include project structure
                               include_dependencies: bool = True, # Include module dependencies

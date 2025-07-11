@@ -54,17 +54,17 @@ graph LR
     parsers --> tree
     parsers --> core
     tree --> core
-    api_docs --> core
-    api_docs --> parsers
     api_docs --> dependencies
+    api_docs --> parsers
     api_docs --> tree
+    api_docs --> core
     dependencies --> core
     dependencies --> parsers
     generators --> core
     generators --> tree
+    cli --> dependencies
     cli --> api_docs
     cli --> parsers
-    cli --> dependencies
     cli --> tree
 
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
