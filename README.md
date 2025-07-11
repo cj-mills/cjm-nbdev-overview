@@ -51,8 +51,8 @@ graph LR
     generators[generators<br/>Auto-generation Utilities]
     cli[cli<br/>Command-Line Interface]
 
-    parsers --> core
     parsers --> tree
+    parsers --> core
     tree --> core
     api_docs --> core
     api_docs --> parsers
@@ -60,12 +60,12 @@ graph LR
     api_docs --> tree
     dependencies --> core
     dependencies --> parsers
-    generators --> tree
     generators --> core
-    cli --> tree
+    generators --> tree
     cli --> api_docs
     cli --> parsers
     cli --> dependencies
+    cli --> tree
 
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```

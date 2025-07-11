@@ -524,12 +524,14 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
     content += diagram  # diagram already includes ```mermaid wrapper
     content += "\n\n"
     
-    # Add dependency matrix if there are dependencies
+    # Count unique module pairs (cross-notebook dependencies)
     if graph.dependencies:
-        # Comment out the dependency matrix for now due to Markdown rendering issues
-        # content += "### Dependency Matrix\n\n"
-        # content += generate_dependency_matrix(graph)
-        content += f"*{len(graph.dependencies)} cross-module dependencies detected*"
+        # Get unique source-target pairs
+        unique_deps = set()
+        for dep in graph.dependencies:
+            unique_deps.add((dep.source, dep.target))
+        
+        content += f"*{len(unique_deps)} cross-module dependencies detected*"
     else:
         content += "No cross-module dependencies detected."
     

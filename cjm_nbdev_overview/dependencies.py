@@ -185,16 +185,23 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
     
     lines.append("")  # Empty line for readability
     
-    # Add edges
+    # Consolidate dependencies between same source and target
+    dep_map = defaultdict(list)
     for dep in graph.dependencies:
-        if show_imports and dep.imported_names:
-            # Show what's imported
-            imports = ', '.join(dep.imported_names[:3])  # Limit to 3
-            if len(dep.imported_names) > 3:
+        key = (dep.source, dep.target)
+        dep_map[key].extend(dep.imported_names)
+    
+    # Add edges
+    for (source, target), imported_names in dep_map.items():
+        if show_imports and imported_names:
+            # Remove duplicates and show what's imported
+            unique_imports = list(dict.fromkeys(imported_names))  # Preserve order while removing duplicates
+            imports = ', '.join(unique_imports[:3])  # Limit to 3
+            if len(unique_imports) > 3:
                 imports += '...'
-            lines.append(f'    {dep.source} -->|"{imports}"| {dep.target}')
+            lines.append(f'    {source} -->|"{imports}"| {target}')
         else:
-            lines.append(f"    {dep.source} --> {dep.target}")
+            lines.append(f"    {source} --> {target}")
     
     # Add styling
     lines.append("")
