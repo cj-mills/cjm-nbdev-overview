@@ -177,7 +177,9 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
         'subgraph', 'direction', 'TD', 'LR', 'TB', 'RL', 'BT'
     }
     
-    def escape_node_name(name: str) -> str:
+    def escape_node_name(
+        name: str  # TODO: Add description
+    ) -> str:  # TODO: Add return description
         "Escape node names that conflict with Mermaid reserved keywords"
         if name.lower() in RESERVED_KEYWORDS:
             # Add suffix to avoid keyword conflicts

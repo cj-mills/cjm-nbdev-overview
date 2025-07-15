@@ -11,10 +11,19 @@ from .core import *
 import re
 
 # %% auto 0
-__all__ = ['generate_tree_lines', 'generate_tree', 'extract_notebook_info', 'generate_tree_with_descriptions',
-           'generate_subdirectory_tree', 'get_tree_summary']
+__all__ = ['strip_markdown_links', 'generate_tree_lines', 'generate_tree', 'extract_notebook_info',
+           'generate_tree_with_descriptions', 'generate_subdirectory_tree', 'get_tree_summary']
 
 # %% ../nbs/02_tree.ipynb 5
+def strip_markdown_links(
+    text: str  # TODO: Add description
+) -> str:  # TODO: Add return description
+    "Strip Markdown links from text, keeping only the link text"
+    # Pattern matches [link text](url)
+    pattern = r'\[([^\]]+)\]\([^\)]+\)'
+    return re.sub(pattern, r'\1', text)
+
+# %% ../nbs/02_tree.ipynb 6
 def generate_tree_lines(path: Path,                         # Directory to visualize
                        prefix: str = "",                    # Line prefix for tree structure
                        is_last: bool = True,                # Is this the last item in parent
@@ -66,7 +75,7 @@ def generate_tree_lines(path: Path,                         # Directory to visua
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 6
+# %% ../nbs/02_tree.ipynb 7
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
                  max_depth: Optional[int] = None,       # Maximum depth to traverse
@@ -86,7 +95,7 @@ def generate_tree(path: Path = None,                    # Directory to visualize
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 10
+# %% ../nbs/02_tree.ipynb 11
 def extract_notebook_info(path: Path                    # Path to notebook file
                          ) -> NotebookInfo:             # Notebook information
     "Extract title and description from a notebook"
@@ -146,7 +155,7 @@ def extract_notebook_info(path: Path                    # Path to notebook file
     
     return nb_info
 
-# %% ../nbs/02_tree.ipynb 13
+# %% ../nbs/02_tree.ipynb 14
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
                                    max_depth: Optional[int] = None, # Maximum depth to traverse
@@ -181,7 +190,9 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
             
             # Format line with description
             if nb_info.description:
-                line = f"{connector}{nb_path.name}".ljust(28) + f" # {nb_info.description}"
+                # Strip Markdown links from description
+                clean_description = strip_markdown_links(nb_info.description)
+                line = f"{connector}{nb_path.name}".ljust(28) + f" # {clean_description}"
             else:
                 line = f"{connector}{nb_path.name}"
             
@@ -193,7 +204,7 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 14
+# %% ../nbs/02_tree.ipynb 15
 def _generate_nested_tree_lines(path: Path,                         # Directory to process
                                prefix: str = "",                    # Line prefix
                                show_counts: bool = True,            # Show notebook counts
@@ -237,7 +248,9 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
     for nb_path in notebooks:
         nb_info = extract_notebook_info(nb_path)
         if nb_info.description:
-            all_items.append((nb_path, 'file', f"# {nb_info.description}"))
+            # Strip Markdown links from description
+            clean_description = strip_markdown_links(nb_info.description)
+            all_items.append((nb_path, 'file', f"# {clean_description}"))
         else:
             all_items.append((nb_path, 'file', ""))
     
@@ -270,7 +283,7 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 18
+# %% ../nbs/02_tree.ipynb 21
 def generate_subdirectory_tree(subdir_path: Path,               # Path to subdirectory
                               show_descriptions: bool = True    # Include notebook descriptions
                               ) -> str:                         # Tree visualization
@@ -302,7 +315,7 @@ def generate_subdirectory_tree(subdir_path: Path,               # Path to subdir
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 19
+# %% ../nbs/02_tree.ipynb 22
 def _generate_subdirectory_lines(item: Path,                    # Item to process
                                 prefix: str,                    # Line prefix
                                 is_last: bool,                  # Is last item
@@ -349,7 +362,9 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
         if show_descriptions:
             nb_info = extract_notebook_info(item)
             if nb_info.description:
-                line = f"{prefix}{connector}{item.name}".ljust(40) + f" # {nb_info.description}"
+                # Strip Markdown links from description
+                clean_description = strip_markdown_links(nb_info.description)
+                line = f"{prefix}{connector}{item.name}".ljust(40) + f" # {clean_description}"
             else:
                 line = f"{prefix}{connector}{item.name}"
         else:
@@ -359,7 +374,7 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 21
+# %% ../nbs/02_tree.ipynb 24
 def get_tree_summary(path: Path = None              # Directory to analyze
                     ) -> str:                       # Summary string
     "Get summary statistics for notebooks in directory tree"

@@ -142,4 +142,6 @@ d = { 'settings': { 'branch': 'main',
                                          'cjm_nbdev_overview.tree.generate_tree_with_descriptions': ( 'tree.html#generate_tree_with_descriptions',
                                                                                                       'cjm_nbdev_overview/tree.py'),
                                          'cjm_nbdev_overview.tree.get_tree_summary': ( 'tree.html#get_tree_summary',
-                                                                                       'cjm_nbdev_overview/tree.py')}}}
+                                                                                       'cjm_nbdev_overview/tree.py'),
+                                         'cjm_nbdev_overview.tree.strip_markdown_links': ( 'tree.html#strip_markdown_links',
+                                                                                           'cjm_nbdev_overview/tree.py')}}}

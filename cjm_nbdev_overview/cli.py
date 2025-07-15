@@ -17,7 +17,9 @@ from .parsers import *
 __all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'update_comprehensive_cmd', 'main']
 
 # %% ../nbs/06_cli.ipynb 5
-def tree_cmd(args):                                     # Command line arguments
+def tree_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Generate tree visualization for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -275,7 +277,8 @@ def update_comprehensive_cmd(
         sys.exit(1)
 
 # %% ../nbs/06_cli.ipynb 16
-def main():
+def main(
+): # TODO: Add type hint
     "Main CLI entry point for nbdev-overview"
     parser = argparse.ArgumentParser(
         prog='nbdev-overview',

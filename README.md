@@ -55,18 +55,18 @@ graph LR
     parsers --> core
     tree --> core
     api_docs --> parsers
-    api_docs --> dependencies
     api_docs --> tree
     api_docs --> core
-    dependencies --> dependencies
+    api_docs --> dependencies
     dependencies --> parsers
+    dependencies --> dependencies
     dependencies --> core
-    generators --> core
     generators --> tree
-    cli --> parsers
-    cli --> dependencies
+    generators --> core
     cli --> tree
+    cli --> parsers
     cli --> api_docs
+    cli --> dependencies
 
     classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
 ```
@@ -349,6 +349,7 @@ class ModuleInfo:
 
 ``` python
 from cjm_nbdev_overview.tree import (
+    strip_markdown_links,
     generate_tree_lines,
     generate_tree,
     extract_notebook_info,
@@ -359,6 +360,13 @@ from cjm_nbdev_overview.tree import (
 ```
 
 #### Functions
+
+``` python
+def strip_markdown_links(
+    text: str  # TODO: Add description
+) -> str:  # TODO: Add return description
+    "Strip Markdown links from text, keeping only the link text"
+```
 
 ``` python
 def generate_tree_lines(path: Path,                         # Directory to visualize
@@ -757,15 +765,9 @@ from cjm_nbdev_overview.cli import (
 #### Functions
 
 ``` python
-def tree_cmd(args):                                     # Command line arguments
-    "Generate tree visualization for nbdev project"
-    # Get project path
-    path = Path(args.path) if args.path else None
-    
-    # Determine exclude_index flag (default True, but --include-index overrides)
-    exclude_index = not getattr(args, 'include_index', False)
-    
-    if args.basic
+def tree_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
     "Generate tree visualization for nbdev project"
 ```
 
@@ -805,6 +807,7 @@ def update_comprehensive_cmd(
 ```
 
 ``` python
-def main()
+def main(
+): # TODO: Add type hint
     "Main CLI entry point for nbdev-overview"
 ```

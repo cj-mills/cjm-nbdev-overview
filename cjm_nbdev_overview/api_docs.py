@@ -383,7 +383,10 @@ def _filter_cells_removing_sections(cells: List,               # List of noteboo
 def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
                              ) -> List[Path]:                   # Sorted notebook paths
     "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
-    def sort_key(nb_path: Path) -> tuple:
+    def sort_key(
+        nb_path: Path  # TODO: Add description
+    ) -> tuple:  # TODO: Add return description
+        "TODO: Add function description"
         match = re.match(r'^(\d+)', nb_path.stem)
         if match:
             return (int(match.group(1)), nb_path.stem)
