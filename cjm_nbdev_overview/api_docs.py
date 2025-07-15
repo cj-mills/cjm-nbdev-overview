@@ -169,8 +169,10 @@ def _generate_import_statement(module: ModuleInfo       # Module information
         from nbdev.config import get_config
         cfg = get_config()
         
-        # Construct the Python module path using the module name
-        python_module_path = cfg.lib_path / f"{module.name}.py"
+        # For nested modules, we need to construct the proper path
+        # If module path is nbs/actions/button.ipynb, the Python module should be at lib/actions/button.py
+        relative_path = module.path.relative_to(cfg.nbs_path).with_suffix('.py')
+        python_module_path = cfg.lib_path / relative_path
         
         if python_module_path.exists():
             # Read the Python file to extract __all__
@@ -198,7 +200,9 @@ def _generate_import_statement(module: ModuleInfo       # Module information
                 if all_items:
                     # Create import statement - replace hyphens with underscores for valid Python imports
                     package_name = cfg.lib_name.replace('-', '_')
-                    full_module_path = f"{package_name}.{module.name}"
+                    # Convert file path to module path (e.g., actions/button.py -> actions.button)
+                    module_path_parts = relative_path.with_suffix('').parts
+                    full_module_path = f"{package_name}.{'.'.join(module_path_parts)}"
                     
                     lines.append("```python")
                     lines.append(f"from {full_module_path} import (")
@@ -215,20 +219,26 @@ def _generate_import_statement(module: ModuleInfo       # Module information
                 else:
                     # Fallback if __all__ not found - replace hyphens with underscores
                     package_name = cfg.lib_name.replace('-', '_')
+                    module_path_parts = relative_path.with_suffix('').parts
+                    full_module_path = f"{package_name}.{'.'.join(module_path_parts)}"
                     lines.append("```python")
-                    lines.append(f"from {package_name}.{module.name} import *")
+                    lines.append(f"from {full_module_path} import *")
                     lines.append("```")
             
             except Exception:
                 # Fallback if parsing fails - replace hyphens with underscores
                 package_name = cfg.lib_name.replace('-', '_')
+                module_path_parts = relative_path.with_suffix('').parts
+                full_module_path = f"{package_name}.{'.'.join(module_path_parts)}"
                 lines.append("```python")
-                lines.append(f"from {package_name}.{module.name} import *")
+                lines.append(f"from {full_module_path} import *")
                 lines.append("```")
         else:
             # Fallback if Python file doesn't exist
+            module_path_parts = relative_path.with_suffix('').parts
+            module_name = '.'.join(module_path_parts)
             lines.append("```python")
-            lines.append(f"# No corresponding Python module found for {module.name}")
+            lines.append(f"# No corresponding Python module found for {module_name}")
             lines.append("```")
     except Exception:
         # Final fallback
