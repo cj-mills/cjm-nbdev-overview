@@ -170,17 +170,32 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
                            show_imports: bool = False   # Show imported names
                            ) -> str:                    # Mermaid diagram code
     "Generate a Mermaid.js dependency diagram from a dependency graph"
+    
+    # Define known Mermaid reserved keywords that need escaping
+    RESERVED_KEYWORDS = {
+        'style', 'end', 'default', 'class', 'classDef', 'click', 'graph', 
+        'subgraph', 'direction', 'TD', 'LR', 'TB', 'RL', 'BT'
+    }
+    
+    def escape_node_name(name: str) -> str:
+        "Escape node names that conflict with Mermaid reserved keywords"
+        if name.lower() in RESERVED_KEYWORDS:
+            # Add suffix to avoid keyword conflicts
+            return name + "_mod"
+        return name
+    
     lines = []
     lines.append(f"```mermaid")
     lines.append(f"graph {direction}")
     
     # Add nodes with descriptions
     for module_name, module_info in graph.modules.items():
-        # Create node label
+        escaped_name = escape_node_name(module_name)
+        # Create node label with original module name for display
         if module_info.title:
-            label = f"{module_name}[{module_name}<br/>{module_info.title}]"
+            label = f"{escaped_name}[{module_name}<br/>{module_info.title}]"
         else:
-            label = f"{module_name}[{module_name}]"
+            label = f"{escaped_name}[{module_name}]"
         lines.append(f"    {label}")
     
     lines.append("")  # Empty line for readability
@@ -193,15 +208,18 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
     
     # Add edges
     for (source, target), imported_names in dep_map.items():
+        escaped_source = escape_node_name(source)
+        escaped_target = escape_node_name(target)
+        
         if show_imports and imported_names:
             # Remove duplicates and show what's imported
             unique_imports = list(dict.fromkeys(imported_names))  # Preserve order while removing duplicates
             imports = ', '.join(unique_imports[:3])  # Limit to 3
             if len(unique_imports) > 3:
                 imports += '...'
-            lines.append(f'    {source} -->|"{imports}"| {target}')
+            lines.append(f'    {escaped_source} -->|"{imports}"| {escaped_target}')
         else:
-            lines.append(f"    {source} --> {target}")
+            lines.append(f"    {escaped_source} --> {escaped_target}")
     
     # Add styling
     lines.append("")
