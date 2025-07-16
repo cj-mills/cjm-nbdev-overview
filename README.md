@@ -51,20 +51,20 @@ graph LR
     generators[generators<br/>Auto-generation Utilities]
     cli[cli<br/>Command-Line Interface]
 
-    parsers --> core
     parsers --> tree
+    parsers --> core
     tree --> core
-    api_docs --> core
     api_docs --> tree
-    api_docs --> dependencies
     api_docs --> parsers
-    dependencies --> core
-    dependencies --> dependencies
+    api_docs --> dependencies
+    api_docs --> core
     dependencies --> parsers
-    generators --> core
+    dependencies --> dependencies
+    dependencies --> core
     generators --> tree
-    cli --> tree
+    generators --> core
     cli --> api_docs
+    cli --> tree
     cli --> dependencies
     cli --> parsers
 

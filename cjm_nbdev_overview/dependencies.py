@@ -73,7 +73,8 @@ def extract_project_imports(import_str: str,            # Import statement
             # Extract the module name after project name
             module_parts = module.split('.')
             if len(module_parts) > 1:
-                target_module = module_parts[1]  # Get the module after project name
+                # Join all parts after the project name to get full module path
+                target_module = '.'.join(module_parts[1:])
                 
                 # Parse imported names
                 imported_names = [name.strip() for name in imports.split(',')]
@@ -97,7 +98,8 @@ def extract_project_imports(import_str: str,            # Import statement
         if module.startswith(project_name):
             module_parts = module.split('.')
             if len(module_parts) > 1:
-                target_module = module_parts[1]
+                # Join all parts after the project name to get full module path
+                target_module = '.'.join(module_parts[1:])
                 
                 return ModuleDependency(
                     source="",  # Will be filled by caller
@@ -186,18 +188,28 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
             return name + "_mod"
         return name
     
+    def sanitize_node_id(
+        name: str  # Module name with possible dots
+    ) -> str:  # Sanitized node ID
+        "Convert module name to valid Mermaid node ID"
+        # Replace dots with underscores for valid Mermaid IDs
+        return name.replace('.', '_')
+    
     lines = []
     lines.append(f"```mermaid")
     lines.append(f"graph {direction}")
     
     # Add nodes with descriptions
     for module_name, module_info in graph.modules.items():
-        escaped_name = escape_node_name(module_name)
+        # Create a sanitized ID for Mermaid
+        node_id = sanitize_node_id(module_name)
+        escaped_id = escape_node_name(node_id)
+        
         # Create node label with original module name for display
         if module_info.title:
-            label = f"{escaped_name}[{module_name}<br/>{module_info.title}]"
+            label = f"{escaped_id}[{module_name}<br/>{module_info.title}]"
         else:
-            label = f"{escaped_name}[{module_name}]"
+            label = f"{escaped_id}[{module_name}]"
         lines.append(f"    {label}")
     
     lines.append("")  # Empty line for readability
@@ -210,8 +222,11 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
     
     # Add edges
     for (source, target), imported_names in dep_map.items():
-        escaped_source = escape_node_name(source)
-        escaped_target = escape_node_name(target)
+        # Sanitize module names for Mermaid IDs
+        source_id = sanitize_node_id(source)
+        target_id = sanitize_node_id(target)
+        escaped_source = escape_node_name(source_id)
+        escaped_target = escape_node_name(target_id)
         
         if show_imports and imported_names:
             # Remove duplicates and show what's imported
