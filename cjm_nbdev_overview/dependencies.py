@@ -238,10 +238,6 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
         else:
             lines.append(f"    {escaped_source} --> {escaped_target}")
     
-    # Add styling
-    lines.append("")
-    lines.append("    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px")
-    
     lines.append("```")
     
     return '\n'.join(lines)

@@ -54,21 +54,19 @@ graph LR
     parsers --> tree
     parsers --> core
     tree --> core
-    api_docs --> tree
     api_docs --> parsers
     api_docs --> dependencies
+    api_docs --> tree
     api_docs --> core
-    dependencies --> parsers
     dependencies --> dependencies
+    dependencies --> parsers
     dependencies --> core
     generators --> tree
     generators --> core
-    cli --> api_docs
-    cli --> tree
     cli --> dependencies
     cli --> parsers
-
-    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
+    cli --> tree
+    cli --> api_docs
 ```
 
 *16 cross-module dependencies detected*
