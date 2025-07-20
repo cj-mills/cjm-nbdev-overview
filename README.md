@@ -37,7 +37,7 @@ detailed documentation for all modules in your project.
     ├── 05_generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization
     └── 06_cli.ipynb          # CLI commands for nbdev project overview generation and analysis
 
-Total: 8 notebooks
+Total: 7 notebooks
 
 ## Module Dependencies
 
@@ -54,19 +54,19 @@ graph LR
     parsers --> tree
     parsers --> core
     tree --> core
-    api_docs --> tree
     api_docs --> parsers
-    api_docs --> core
     api_docs --> dependencies
+    api_docs --> core
+    api_docs --> tree
     dependencies --> dependencies
     dependencies --> parsers
     dependencies --> core
     generators --> core
     generators --> tree
-    cli --> tree
     cli --> parsers
     cli --> api_docs
     cli --> dependencies
+    cli --> tree
 ```
 
 *16 cross-module dependencies detected*

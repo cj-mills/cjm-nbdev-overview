@@ -447,7 +447,7 @@ def get_tree_summary(path: Path = None              # Directory to analyze
         path = cfg.nbs_path
     
     # Count notebooks
-    total_notebooks = len(get_notebook_files(path, recursive=True))
+    total_notebooks = len([nb for nb in get_notebook_files(path, recursive=True) if nb.name != 'index.ipynb'])
     
     # Count directories
     subdirs = get_subdirectories(path, recursive=False)
