@@ -29,13 +29,13 @@ detailed documentation for all modules in your project.
 ## Project Structure
 
     nbs/
-    ├── 00_core.ipynb            # Core utilities and data models for nbdev project overview generation
-    ├── 01_parsers.ipynb         # Parse notebook metadata, content, and extract function/class signatures with docments
-    ├── 02_tree.ipynb            # Generate tree visualizations for nbdev project structure
-    ├── 03_api_docs.ipynb        # Generate module overviews with formatted signatures for nbdev projects
-    ├── 04_dependencies.ipynb    # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
-    ├── 05_generators.ipynb      # Auto-generate folder_name.ipynb notebooks for nbdev project organization
-    └── 06_cli.ipynb             # CLI commands for nbdev project overview generation and analysis
+    ├── 00_core.ipynb         # Core utilities and data models for nbdev project overview generation
+    ├── 01_parsers.ipynb      # Parse notebook metadata, content, and extract function/class signatures with docments
+    ├── 02_tree.ipynb         # Generate tree visualizations for nbdev project structure
+    ├── 03_api_docs.ipynb     # Generate module overviews with formatted signatures for nbdev projects
+    ├── 04_dependencies.ipynb # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
+    ├── 05_generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization
+    └── 06_cli.ipynb          # CLI commands for nbdev project overview generation and analysis
 
 Total: 8 notebooks
 
@@ -54,19 +54,19 @@ graph LR
     parsers --> tree
     parsers --> core
     tree --> core
-    api_docs --> parsers
-    api_docs --> dependencies
     api_docs --> tree
+    api_docs --> parsers
     api_docs --> core
+    api_docs --> dependencies
     dependencies --> dependencies
     dependencies --> parsers
     dependencies --> core
-    generators --> tree
     generators --> core
-    cli --> dependencies
-    cli --> parsers
+    generators --> tree
     cli --> tree
+    cli --> parsers
     cli --> api_docs
+    cli --> dependencies
 ```
 
 *16 cross-module dependencies detected*
@@ -399,7 +399,8 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
                                 is_last: bool,                  # Is last item
                                 is_dir: bool,                   # Is directory
                                 show_descriptions: bool,        # Show descriptions
-                                depth: int                      # Current depth
+                                depth: int,                     # Current depth
+                                max_length: int = 0             # Max length for alignment (calculated externally)
                                 ) -> List[str]:                 # Tree lines
     "Generate tree lines for subdirectory visualization"
 ```
@@ -408,6 +409,12 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
 def get_tree_summary(path: Path = None              # Directory to analyze
                     ) -> str:                       # Summary string
     "Get summary statistics for notebooks in directory tree"
+```
+
+#### Variables
+
+``` python
+ALIGNMENT_BUFFER = 1
 ```
 
 ### API Documentation Generation (`03_api_docs.ipynb`)

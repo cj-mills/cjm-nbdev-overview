@@ -11,10 +11,13 @@ from .core import *
 import re
 
 # %% auto 0
-__all__ = ['strip_markdown_links', 'generate_tree_lines', 'generate_tree', 'extract_notebook_info',
+__all__ = ['ALIGNMENT_BUFFER', 'strip_markdown_links', 'generate_tree_lines', 'generate_tree', 'extract_notebook_info',
            'generate_tree_with_descriptions', 'generate_subdirectory_tree', 'get_tree_summary']
 
 # %% ../nbs/02_tree.ipynb 5
+ALIGNMENT_BUFFER = 1
+
+# %% ../nbs/02_tree.ipynb 6
 def strip_markdown_links(
     text: str  # TODO: Add description
 ) -> str:  # TODO: Add return description
@@ -23,7 +26,7 @@ def strip_markdown_links(
     pattern = r'\[([^\]]+)\]\([^\)]+\)'
     return re.sub(pattern, r'\1', text)
 
-# %% ../nbs/02_tree.ipynb 6
+# %% ../nbs/02_tree.ipynb 7
 def generate_tree_lines(path: Path,                         # Directory to visualize
                        prefix: str = "",                    # Line prefix for tree structure
                        is_last: bool = True,                # Is this the last item in parent
@@ -75,7 +78,7 @@ def generate_tree_lines(path: Path,                         # Directory to visua
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 7
+# %% ../nbs/02_tree.ipynb 8
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
                  max_depth: Optional[int] = None,       # Maximum depth to traverse
@@ -95,7 +98,7 @@ def generate_tree(path: Path = None,                    # Directory to visualize
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 11
+# %% ../nbs/02_tree.ipynb 12
 def extract_notebook_info(path: Path                    # Path to notebook file
                          ) -> NotebookInfo:             # Notebook information
     "Extract title and description from a notebook"
@@ -155,7 +158,7 @@ def extract_notebook_info(path: Path                    # Path to notebook file
     
     return nb_info
 
-# %% ../nbs/02_tree.ipynb 14
+# %% ../nbs/02_tree.ipynb 15
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
                                    max_depth: Optional[int] = None, # Maximum depth to traverse
@@ -181,6 +184,11 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
         if exclude_index:
             notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
         
+        # First pass: collect all lines to calculate the maximum length
+        temp_lines = []
+        descriptions = []
+        max_length = 0
+        
         for i, nb_path in enumerate(notebooks):
             is_last = (i == len(notebooks) - 1)
             connector = "└── " if is_last else "├── "
@@ -188,13 +196,30 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
             # Extract notebook info
             nb_info = extract_notebook_info(nb_path)
             
-            # Format line with description
+            # Create the base line without description
+            base_line = f"{connector}{nb_path.name}"
+            temp_lines.append(base_line)
+            
+            # Track max length for alignment
+            max_length = max(max_length, len(base_line))
+            
+            # Store description for later use
             if nb_info.description:
                 # Strip Markdown links from description
                 clean_description = strip_markdown_links(nb_info.description)
-                line = f"{connector}{nb_path.name}".ljust(28) + f" # {clean_description}"
+                descriptions.append(clean_description)
             else:
-                line = f"{connector}{nb_path.name}"
+                descriptions.append(None)
+        
+        # Second pass: create properly aligned lines
+        # Add a small buffer between the longest filename and comments
+        alignment_offset = max_length + ALIGNMENT_BUFFER
+        
+        for base_line, description in zip(temp_lines, descriptions):
+            if description:
+                line = base_line.ljust(alignment_offset) + f"# {description}"
+            else:
+                line = base_line
             
             lines.append(line)
     else:
@@ -204,7 +229,7 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 15
+# %% ../nbs/02_tree.ipynb 16
 def _generate_nested_tree_lines(path: Path,                         # Directory to process
                                prefix: str = "",                    # Line prefix
                                show_counts: bool = True,            # Show notebook counts
@@ -227,8 +252,9 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
     if exclude_index:
         notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
     
-    # Combine and sort all items
+    # First pass: collect all items and calculate max length
     all_items = []
+    max_length = 0
     
     # Add subdirectories
     for subdir in subdirs:
@@ -254,6 +280,18 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
         else:
             all_items.append((nb_path, 'file', ""))
     
+    # Calculate max length for notebook files (for alignment)
+    for i, (item, item_type, annotation) in enumerate(all_items):
+        is_last = (i == len(all_items) - 1)
+        connector = "└── " if is_last else "├── "
+        
+        if item_type == 'file':
+            base_line = f"{prefix}{connector}{item.name}"
+            max_length = max(max_length, len(base_line))
+    
+    # Add a small buffer for alignment if we have any notebooks
+    alignment_offset = max_length + ALIGNMENT_BUFFER if max_length > 0 else 0
+    
     # Generate lines for each item
     for i, (item, item_type, annotation) in enumerate(all_items):
         is_last = (i == len(all_items) - 1)
@@ -276,14 +314,14 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
         else:
             # Notebook file
             nb_line = f"{prefix}{connector}{item.name}"
-            if annotation:
+            if annotation and alignment_offset > 0:
                 # Pad the filename to align descriptions
-                nb_line = nb_line.ljust(len(prefix) + 28) + f" {annotation}"
+                nb_line = nb_line.ljust(alignment_offset) + f" {annotation}"
             lines.append(nb_line)
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 21
+# %% ../nbs/02_tree.ipynb 22
 def generate_subdirectory_tree(subdir_path: Path,               # Path to subdirectory
                               show_descriptions: bool = True    # Include notebook descriptions
                               ) -> str:                         # Tree visualization
@@ -306,22 +344,35 @@ def generate_subdirectory_tree(subdir_path: Path,               # Path to subdir
     # Sort by name
     items.sort(key=lambda x: x[0].name.lower())
     
+    # Calculate max length for alignment if showing descriptions
+    max_length = 0
+    if show_descriptions:
+        for i, (item, is_dir) in enumerate(items):
+            if not is_dir:  # Only calculate for notebooks
+                is_last = (i == len(items) - 1)
+                connector = "└── " if is_last else "├── "
+                base_line = f"{connector}{item.name}"
+                max_length = max(max_length, len(base_line))
+        # Add buffer
+        max_length += 4 if max_length > 0 else 0
+    
     # Generate tree lines
     for i, (item, is_dir) in enumerate(items):
         is_last = (i == len(items) - 1)
         lines.extend(_generate_subdirectory_lines(
-            item, "", is_last, is_dir, show_descriptions, 0
+            item, "", is_last, is_dir, show_descriptions, 0, max_length
         ))
     
     return '\n'.join(lines)
 
-# %% ../nbs/02_tree.ipynb 22
+# %% ../nbs/02_tree.ipynb 23
 def _generate_subdirectory_lines(item: Path,                    # Item to process
                                 prefix: str,                    # Line prefix
                                 is_last: bool,                  # Is last item
                                 is_dir: bool,                   # Is directory
                                 show_descriptions: bool,        # Show descriptions
-                                depth: int                      # Current depth
+                                depth: int,                     # Current depth
+                                max_length: int = 0             # Max length for alignment (calculated externally)
                                 ) -> List[str]:                 # Tree lines
     "Generate tree lines for subdirectory visualization"
     lines = []
@@ -350,31 +401,44 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
         # Sort by name
         sub_items.sort(key=lambda x: x[0].name.lower())
         
+        # Calculate max length for this subdirectory if not provided
+        local_max_length = max_length
+        if local_max_length == 0 and show_descriptions:
+            for sub_item, sub_is_dir in sub_items:
+                if not sub_is_dir:  # Only calculate for notebooks
+                    sub_connector = "└── " if sub_item == sub_items[-1][0] else "├── "
+                    base_line = f"{prefix}{extension}{sub_connector}{sub_item.name}"
+                    local_max_length = max(local_max_length, len(base_line))
+            # Add buffer
+            local_max_length += 4 if local_max_length > 0 else 0
+        
         # Generate lines for sub-items
         for j, (sub_item, sub_is_dir) in enumerate(sub_items):
             sub_is_last = (j == len(sub_items) - 1)
             lines.extend(_generate_subdirectory_lines(
                 sub_item, prefix + extension, sub_is_last, 
-                sub_is_dir, show_descriptions, depth + 1
+                sub_is_dir, show_descriptions, depth + 1, local_max_length
             ))
     else:
         # Notebook entry
+        base_line = f"{prefix}{connector}{item.name}"
+        
         if show_descriptions:
             nb_info = extract_notebook_info(item)
-            if nb_info.description:
+            if nb_info.description and max_length > 0:
                 # Strip Markdown links from description
                 clean_description = strip_markdown_links(nb_info.description)
-                line = f"{prefix}{connector}{item.name}".ljust(40) + f" # {clean_description}"
+                line = base_line.ljust(max_length) + f"# {clean_description}"
             else:
-                line = f"{prefix}{connector}{item.name}"
+                line = base_line
         else:
-            line = f"{prefix}{connector}{item.name}"
+            line = base_line
         
         lines.append(line)
     
     return lines
 
-# %% ../nbs/02_tree.ipynb 24
+# %% ../nbs/02_tree.ipynb 25
 def get_tree_summary(path: Path = None              # Directory to analyze
                     ) -> str:                       # Summary string
     "Get summary statistics for notebooks in directory tree"
