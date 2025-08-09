@@ -344,8 +344,9 @@ def parse_code_cell(cell: Dict[str, Any]                       # Notebook code c
     source = get_cell_source(cell)
     source_lines = source.split('\n')
     
-    # Check if cell is exported
-    is_exported = '#| export' in source
+    # Check if cell is exported - support all nbdev export directive formats
+    # Supports: #| export, #|export, #| exporti, #|exporti, #| exports, #|exports
+    is_exported = any(re.match(r'^\s*#\|\s*export[is]?\s*$', line) for line in source_lines)
     
     functions = []
     classes = []

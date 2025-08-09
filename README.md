@@ -51,22 +51,22 @@ graph LR
     generators[generators<br/>Auto-generation Utilities]
     cli[cli<br/>Command-Line Interface]
 
-    parsers --> tree
     parsers --> core
+    parsers --> tree
     tree --> core
     api_docs --> parsers
-    api_docs --> dependencies
     api_docs --> core
     api_docs --> tree
-    dependencies --> dependencies
+    api_docs --> dependencies
     dependencies --> parsers
     dependencies --> core
+    dependencies --> dependencies
     generators --> core
     generators --> tree
     cli --> parsers
+    cli --> tree
     cli --> api_docs
     cli --> dependencies
-    cli --> tree
 ```
 
 *16 cross-module dependencies detected*
