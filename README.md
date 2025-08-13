@@ -29,13 +29,13 @@ detailed documentation for all modules in your project.
 ## Project Structure
 
     nbs/
-    ├── 00_core.ipynb         # Core utilities and data models for nbdev project overview generation
-    ├── 01_parsers.ipynb      # Parse notebook metadata, content, and extract function/class signatures with docments
-    ├── 02_tree.ipynb         # Generate tree visualizations for nbdev project structure
-    ├── 03_api_docs.ipynb     # Generate module overviews with formatted signatures for nbdev projects
-    ├── 04_dependencies.ipynb # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
-    ├── 05_generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization
-    └── 06_cli.ipynb          # CLI commands for nbdev project overview generation and analysis
+    ├── api_docs.ipynb     # Generate module overviews with formatted signatures for nbdev projects
+    ├── cli.ipynb          # CLI commands for nbdev project overview generation and analysis
+    ├── core.ipynb         # Core utilities and data models for nbdev project overview generation
+    ├── dependencies.ipynb # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams
+    ├── generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization
+    ├── parsers.ipynb      # Parse notebook metadata, content, and extract function/class signatures with docments
+    └── tree.ipynb         # Generate tree visualizations for nbdev project structure
 
 Total: 7 notebooks
 
@@ -43,30 +43,30 @@ Total: 7 notebooks
 
 ``` mermaid
 graph LR
-    core[core<br/>Core Utilities]
-    parsers[parsers<br/>Notebook and Module Parsing]
-    tree[tree<br/>Directory Tree Visualization]
     api_docs[api_docs<br/>API Documentation Generation]
+    cli[cli<br/>Command-Line Interface]
+    core[core<br/>Core Utilities]
     dependencies[dependencies<br/>Dependency Analysis and Visualization]
     generators[generators<br/>Auto-generation Utilities]
-    cli[cli<br/>Command-Line Interface]
+    parsers[parsers<br/>Notebook and Module Parsing]
+    tree[tree<br/>Directory Tree Visualization]
 
-    parsers --> core
-    parsers --> tree
-    tree --> core
-    api_docs --> parsers
-    api_docs --> core
     api_docs --> tree
+    api_docs --> core
     api_docs --> dependencies
-    dependencies --> parsers
-    dependencies --> core
-    dependencies --> dependencies
-    generators --> core
-    generators --> tree
-    cli --> parsers
+    api_docs --> parsers
     cli --> tree
+    cli --> parsers
     cli --> api_docs
     cli --> dependencies
+    dependencies --> dependencies
+    dependencies --> core
+    dependencies --> parsers
+    generators --> tree
+    generators --> core
+    parsers --> tree
+    parsers --> core
+    tree --> core
 ```
 
 *16 cross-module dependencies detected*
@@ -101,14 +101,246 @@ For detailed help on any command, use `nbdev-overview <command> --help`.
 
 Detailed documentation for each module in the project:
 
-### Core Utilities (`00_core.ipynb`)
+### API Documentation Generation (`api_docs.ipynb`)
+
+> Generate module overviews with formatted signatures for nbdev projects
+
+#### Import
+
+``` python
+from cjm_nbdev_overview.api_docs import (
+    format_function_doc,
+    format_class_doc,
+    format_variable_doc,
+    generate_module_overview,
+    generate_project_api_docs,
+    update_index_module_docs,
+    add_project_structure_section,
+    add_dependencies_section,
+    add_cli_reference_section,
+    update_index_comprehensive
+)
+```
+
+#### Functions
+
+``` python
+def format_function_doc(func: FunctionInfo,             # Function information
+                       indent: str = ""                 # Indentation prefix
+                       ) -> str:                        # Formatted documentation
+    "Format a function with its signature for documentation"
+```
+
+``` python
+def format_class_doc(cls: ClassInfo                     # Class information
+                    ) -> str:                           # Formatted documentation
+    "Format a class with its signature and methods for documentation"
+```
+
+``` python
+def format_variable_doc(var: VariableInfo               # Variable information
+                       ) -> str:                        # Formatted documentation
+    "Format a variable for documentation"
+```
+
+``` python
+def _generate_module_header(module: ModuleInfo          # Module information
+                          ) -> List[str]:               # Header lines
+    "Generate module title and description lines"
+```
+
+``` python
+def _generate_import_statement(module: ModuleInfo       # Module information
+                             ) -> List[str]:            # Import statement lines
+    "Generate import statement lines for a module"
+```
+
+``` python
+def _filter_module_items(module: ModuleInfo,            # Module information
+                        show_all: bool = False          # Show all items including private
+                        ) -> tuple:                     # (functions, classes, variables)
+    "Filter module items based on show_all and is_exported flags"
+```
+
+``` python
+def _generate_functions_section(functions: List[FunctionInfo]   # List of functions
+                              ) -> List[str]:                   # Section lines
+    "Generate the functions section of module documentation"
+```
+
+``` python
+def _generate_classes_section(classes: List[ClassInfo]          # List of classes
+                            ) -> List[str]:                     # Section lines
+    "Generate the classes section of module documentation"
+```
+
+``` python
+def _generate_variables_section(variables: List[VariableInfo]   # List of variables
+                              ) -> List[str]:                   # Section lines
+    "Generate the variables section of module documentation"
+```
+
+``` python
+def generate_module_overview(module: ModuleInfo,        # Module information
+                           show_all: bool = False       # Show all items including private
+                           ) -> str:                    # Module overview markdown
+    "Generate a markdown overview for a module"
+```
+
+``` python
+def generate_project_api_docs(path: Path = None,        # Project path (defaults to nbs_path)
+                            show_all: bool = False      # Show all items including private
+                            ) -> str:                   # Full API documentation
+    "Generate API documentation for all modules in a project"
+```
+
+``` python
+def _filter_cells_removing_sections(cells: List,               # List of notebook cells
+                                   start_marker: str            # Section marker to remove
+                                   ) -> List:                   # Filtered cells
+    "Remove all cells from a section marked by start_marker until the next ## section"
+```
+
+``` python
+def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
+                             ) -> List[Path]:                   # Sorted notebook paths
+    "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
+```
+
+``` python
+def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
+                               ) -> List[Path]:                 # Notebooks with exported content
+    "Filter notebooks to only include those with exported content"
+```
+
+``` python
+def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
+                                   ) -> List:                   # List of notebook cells
+    "Generate markdown cells containing module overview documentation"
+```
+
+``` python
+def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
+                           start_marker: str = "## Module Overview"  # Marker to identify module docs section
+                           ) -> None:                          # Updates index.ipynb in place
+    "Update the module documentation section in index.ipynb"
+```
+
+``` python
+def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
+                                 marker: str = "## Project Structure",  # Section marker
+                                 exclude_index: bool = True     # Exclude index.ipynb from tree
+                                 ) -> str:                       # Generated structure content
+    "Generate project structure tree content for index.ipynb"
+```
+
+``` python
+def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
+                           marker: str = "## Module Dependencies", # Section marker
+                           direction: str = "LR"                # Diagram direction
+                           ) -> str:                            # Generated dependencies content
+    "Generate module dependencies diagram content for index.ipynb"
+```
+
+``` python
+def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
+                            ) -> str:                           # Generated CLI content
+    "Generate CLI reference content for index.ipynb based on project's console scripts"
+```
+
+``` python
+def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
+                              include_structure: bool = True,  # Include project structure
+                              include_dependencies: bool = True, # Include module dependencies
+                              include_cli: bool = True,         # Include CLI reference
+                              include_modules: bool = True      # Include module documentation
+                              ) -> None:                        # Updates index.ipynb in place
+    "Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"
+```
+
+### Command-Line Interface (`cli.ipynb`)
+
+> CLI commands for nbdev project overview generation and analysis
+
+#### Import
+
+``` python
+from cjm_nbdev_overview.cli import (
+    tree_cmd,
+    api_cmd,
+    deps_cmd,
+    overview_cmd,
+    update_index_cmd,
+    update_comprehensive_cmd,
+    main
+)
+```
+
+#### Functions
+
+``` python
+def tree_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Generate tree visualization for nbdev project"
+```
+
+``` python
+def api_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Generate API documentation for nbdev project"
+```
+
+``` python
+def deps_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Analyze and visualize module dependencies"
+```
+
+``` python
+def overview_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Generate complete project overview"
+```
+
+``` python
+def update_index_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Update index.ipynb with module documentation"
+```
+
+``` python
+def update_comprehensive_cmd(
+    args  # TODO: Add type hint and description
+): # Command line arguments - TODO: Add type hint
+    "Comprehensively update index.ipynb with all sections"
+```
+
+``` python
+def main(
+): # TODO: Add type hint
+    "Main CLI entry point for nbdev-overview"
+```
+
+### Core Utilities (`core.ipynb`)
 
 > Core utilities and data models for nbdev project overview generation
 
 #### Import
 
 ``` python
-# No corresponding Python module found for 00_core
+from cjm_nbdev_overview.core import (
+    NotebookInfo,
+    DirectoryInfo,
+    get_notebook_files,
+    get_subdirectories,
+    read_notebook,
+    get_cell_source
+)
 ```
 
 #### Functions
@@ -172,7 +404,155 @@ class DirectoryInfo:
         "Get total notebook count including subdirectories"
 ```
 
-### Notebook and Module Parsing (`01_parsers.ipynb`)
+### Dependency Analysis and Visualization (`dependencies.ipynb`)
+
+> Analyze cross-notebook imports and generate Mermaid.js dependency
+> diagrams
+
+#### Import
+
+``` python
+from cjm_nbdev_overview.dependencies import (
+    ModuleDependency,
+    DependencyGraph,
+    extract_project_imports,
+    analyze_module_dependencies,
+    build_dependency_graph,
+    generate_mermaid_diagram,
+    generate_dependency_matrix
+)
+```
+
+#### Functions
+
+``` python
+def extract_project_imports(import_str: str,            # Import statement
+                           project_name: str            # Project package name
+                           ) -> Optional[ModuleDependency]:  # Dependency if internal
+    "Extract project-internal imports from an import statement"
+```
+
+``` python
+def analyze_module_dependencies(module: ModuleInfo,     # Module to analyze
+                               project_name: str        # Project package name
+                               ) -> List[ModuleDependency]:  # Dependencies found
+    "Analyze a module's imports to find project-internal dependencies"
+```
+
+``` python
+def build_dependency_graph(path: Path = None,           # Project path
+                          project_name: Optional[str] = None  # Override project name
+                          ) -> DependencyGraph:         # Dependency graph
+    "Build a dependency graph for all modules in a project"
+```
+
+``` python
+def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
+                           direction: str = "TD",       # Diagram direction (TD/LR)
+                           show_imports: bool = False   # Show imported names
+                           ) -> str:                    # Mermaid diagram code
+    "Generate a Mermaid.js dependency diagram from a dependency graph"
+```
+
+``` python
+def generate_dependency_matrix(graph: DependencyGraph   # Dependency graph
+                              ) -> str:                 # Markdown table
+    "Generate a dependency matrix showing which modules depend on which"
+```
+
+#### Classes
+
+``` python
+@dataclass
+class ModuleDependency:
+    "Represents a dependency between modules"
+    
+    source: str  # Source module name
+    target: str  # Target module name
+    import_type: str  # Type of import (from/import)
+    imported_names: List[str] = field(...)  # Specific names imported
+```
+
+``` python
+@dataclass
+class DependencyGraph:
+    "Dependency graph for a project"
+    
+    modules: Dict[str, ModuleInfo] = field(...)  # Module name -> ModuleInfo
+    dependencies: List[ModuleDependency] = field(...)  # All dependencies
+    
+    def add_module(
+            self,
+            module: ModuleInfo  # TODO: Add description
+        ): # Add a module to the graph - TODO: Add type hint
+        "Add a module to the dependency graph"
+    
+    def add_dependency(
+            self,
+            dep: ModuleDependency  # TODO: Add description
+        ): # Add a dependency - TODO: Add type hint
+        "Add a dependency to the graph"
+    
+    def get_module_dependencies(self, module_name: str  # Module to query
+                                   ) -> List[ModuleDependency]:  # Dependencies
+        "Get all dependencies for a specific module"
+    
+    def get_module_dependents(self, module_name: str    # Module to query
+                                 ) -> List[ModuleDependency]:  # Dependents
+        "Get all modules that depend on a specific module"
+```
+
+### Auto-generation Utilities (`generators.ipynb`)
+
+> Auto-generate folder_name.ipynb notebooks for nbdev project
+> organization
+
+#### Import
+
+``` python
+from cjm_nbdev_overview.generators import (
+    create_folder_notebook,
+    generate_folder_notebook,
+    generate_all_folder_notebooks,
+    interactive_folder_notebook_generator
+)
+```
+
+#### Functions
+
+``` python
+def create_folder_notebook(folder_path: Path,           # Path to folder
+                          title: str,                   # Notebook title
+                          description: str              # Folder description
+                          ) -> List[NbCell]:            # List of notebook cells
+    "Create cells for a folder notebook with proper nbdev structure"
+```
+
+``` python
+def generate_folder_notebook(folder_path: Path,         # Path to folder
+                           title: Optional[str] = None, # Custom title
+                           description: Optional[str] = None, # Custom description
+                           overwrite: bool = False      # Overwrite existing
+                           ) -> Path:                   # Path to created notebook
+    "Generate a folder_name.ipynb notebook for a folder"
+```
+
+``` python
+def generate_all_folder_notebooks(base_path: Path = None, # Base path (defaults to nbs)
+                                 recursive: bool = True,  # Include nested folders
+                                 overwrite: bool = False, # Overwrite existing
+                                 dry_run: bool = False    # Just show what would be created
+                                 ) -> List[Path]:         # Created notebook paths
+    "Generate folder notebooks for all folders that don't have them"
+```
+
+``` python
+def interactive_folder_notebook_generator(base_path: Path = None  # Base path
+                                        ) -> List[Path]:          # Created notebooks
+    "Interactively generate folder notebooks with custom titles and descriptions"
+```
+
+### Notebook and Module Parsing (`parsers.ipynb`)
 
 > Parse notebook metadata, content, and extract function/class
 > signatures with docments
@@ -180,7 +560,19 @@ class DirectoryInfo:
 #### Import
 
 ``` python
-# No corresponding Python module found for 01_parsers
+from cjm_nbdev_overview.parsers import (
+    FunctionInfo,
+    VariableInfo,
+    ClassInfo,
+    ModuleInfo,
+    extract_docments_signature,
+    parse_function,
+    parse_class,
+    parse_variable,
+    parse_code_cell,
+    parse_notebook,
+    parse_python_file
+)
 ```
 
 #### Functions
@@ -320,14 +712,23 @@ class ModuleInfo:
     imports: List[str] = field(...)  # Import statements
 ```
 
-### Directory Tree Visualization (`02_tree.ipynb`)
+### Directory Tree Visualization (`tree.ipynb`)
 
 > Generate tree visualizations for nbdev project structure
 
 #### Import
 
 ``` python
-# No corresponding Python module found for 02_tree
+from cjm_nbdev_overview.tree import (
+    ALIGNMENT_BUFFER,
+    strip_markdown_links,
+    generate_tree_lines,
+    generate_tree,
+    extract_notebook_info,
+    generate_tree_with_descriptions,
+    generate_subdirectory_tree,
+    get_tree_summary
+)
 ```
 
 #### Functions
@@ -415,345 +816,4 @@ def get_tree_summary(path: Path = None              # Directory to analyze
 
 ``` python
 ALIGNMENT_BUFFER = 1
-```
-
-### API Documentation Generation (`03_api_docs.ipynb`)
-
-> Generate module overviews with formatted signatures for nbdev projects
-
-#### Import
-
-``` python
-# No corresponding Python module found for 03_api_docs
-```
-
-#### Functions
-
-``` python
-def format_function_doc(func: FunctionInfo,             # Function information
-                       indent: str = ""                 # Indentation prefix
-                       ) -> str:                        # Formatted documentation
-    "Format a function with its signature for documentation"
-```
-
-``` python
-def format_class_doc(cls: ClassInfo                     # Class information
-                    ) -> str:                           # Formatted documentation
-    "Format a class with its signature and methods for documentation"
-```
-
-``` python
-def format_variable_doc(var: VariableInfo               # Variable information
-                       ) -> str:                        # Formatted documentation
-    "Format a variable for documentation"
-```
-
-``` python
-def _generate_module_header(module: ModuleInfo          # Module information
-                          ) -> List[str]:               # Header lines
-    "Generate module title and description lines"
-```
-
-``` python
-def _generate_import_statement(module: ModuleInfo       # Module information
-                             ) -> List[str]:            # Import statement lines
-    "Generate import statement lines for a module"
-```
-
-``` python
-def _filter_module_items(module: ModuleInfo,            # Module information
-                        show_all: bool = False          # Show all items including private
-                        ) -> tuple:                     # (functions, classes, variables)
-    "Filter module items based on show_all and is_exported flags"
-```
-
-``` python
-def _generate_functions_section(functions: List[FunctionInfo]   # List of functions
-                              ) -> List[str]:                   # Section lines
-    "Generate the functions section of module documentation"
-```
-
-``` python
-def _generate_classes_section(classes: List[ClassInfo]          # List of classes
-                            ) -> List[str]:                     # Section lines
-    "Generate the classes section of module documentation"
-```
-
-``` python
-def _generate_variables_section(variables: List[VariableInfo]   # List of variables
-                              ) -> List[str]:                   # Section lines
-    "Generate the variables section of module documentation"
-```
-
-``` python
-def generate_module_overview(module: ModuleInfo,        # Module information
-                           show_all: bool = False       # Show all items including private
-                           ) -> str:                    # Module overview markdown
-    "Generate a markdown overview for a module"
-```
-
-``` python
-def generate_project_api_docs(path: Path = None,        # Project path (defaults to nbs_path)
-                            show_all: bool = False      # Show all items including private
-                            ) -> str:                   # Full API documentation
-    "Generate API documentation for all modules in a project"
-```
-
-``` python
-def _filter_cells_removing_sections(cells: List,               # List of notebook cells
-                                   start_marker: str            # Section marker to remove
-                                   ) -> List:                   # Filtered cells
-    "Remove all cells from a section marked by start_marker until the next ## section"
-```
-
-``` python
-def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
-                             ) -> List[Path]:                   # Sorted notebook paths
-    "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
-```
-
-``` python
-def _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths
-                               ) -> List[Path]:                 # Notebooks with exported content
-    "Filter notebooks to only include those with exported content"
-```
-
-``` python
-def _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths
-                                   ) -> List:                   # List of notebook cells
-    "Generate markdown cells containing module overview documentation"
-```
-
-``` python
-def update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)
-                           start_marker: str = "## Module Overview"  # Marker to identify module docs section
-                           ) -> None:                          # Updates index.ipynb in place
-    "Update the module documentation section in index.ipynb"
-```
-
-``` python
-def add_project_structure_section(index_path: Path = None,      # Path to index.ipynb
-                                 marker: str = "## Project Structure",  # Section marker
-                                 exclude_index: bool = True     # Exclude index.ipynb from tree
-                                 ) -> str:                       # Generated structure content
-    "Generate project structure tree content for index.ipynb"
-```
-
-``` python
-def add_dependencies_section(index_path: Path = None,           # Path to index.ipynb
-                           marker: str = "## Module Dependencies", # Section marker
-                           direction: str = "LR"                # Diagram direction
-                           ) -> str:                            # Generated dependencies content
-    "Generate module dependencies diagram content for index.ipynb"
-```
-
-``` python
-def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
-                            ) -> str:                           # Generated CLI content
-    "Generate CLI reference content for index.ipynb based on project's console scripts"
-```
-
-``` python
-def update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb
-                              include_structure: bool = True,  # Include project structure
-                              include_dependencies: bool = True, # Include module dependencies
-                              include_cli: bool = True,         # Include CLI reference
-                              include_modules: bool = True      # Include module documentation
-                              ) -> None:                        # Updates index.ipynb in place
-    "Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"
-```
-
-### Dependency Analysis and Visualization (`04_dependencies.ipynb`)
-
-> Analyze cross-notebook imports and generate Mermaid.js dependency
-> diagrams
-
-#### Import
-
-``` python
-# No corresponding Python module found for 04_dependencies
-```
-
-#### Functions
-
-``` python
-def extract_project_imports(import_str: str,            # Import statement
-                           project_name: str            # Project package name
-                           ) -> Optional[ModuleDependency]:  # Dependency if internal
-    "Extract project-internal imports from an import statement"
-```
-
-``` python
-def analyze_module_dependencies(module: ModuleInfo,     # Module to analyze
-                               project_name: str        # Project package name
-                               ) -> List[ModuleDependency]:  # Dependencies found
-    "Analyze a module's imports to find project-internal dependencies"
-```
-
-``` python
-def build_dependency_graph(path: Path = None,           # Project path
-                          project_name: Optional[str] = None  # Override project name
-                          ) -> DependencyGraph:         # Dependency graph
-    "Build a dependency graph for all modules in a project"
-```
-
-``` python
-def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
-                           direction: str = "TD",       # Diagram direction (TD/LR)
-                           show_imports: bool = False   # Show imported names
-                           ) -> str:                    # Mermaid diagram code
-    "Generate a Mermaid.js dependency diagram from a dependency graph"
-```
-
-``` python
-def generate_dependency_matrix(graph: DependencyGraph   # Dependency graph
-                              ) -> str:                 # Markdown table
-    "Generate a dependency matrix showing which modules depend on which"
-```
-
-#### Classes
-
-``` python
-@dataclass
-class ModuleDependency:
-    "Represents a dependency between modules"
-    
-    source: str  # Source module name
-    target: str  # Target module name
-    import_type: str  # Type of import (from/import)
-    imported_names: List[str] = field(...)  # Specific names imported
-```
-
-``` python
-@dataclass
-class DependencyGraph:
-    "Dependency graph for a project"
-    
-    modules: Dict[str, ModuleInfo] = field(...)  # Module name -> ModuleInfo
-    dependencies: List[ModuleDependency] = field(...)  # All dependencies
-    
-    def add_module(
-            self,
-            module: ModuleInfo  # TODO: Add description
-        ): # Add a module to the graph - TODO: Add type hint
-        "Add a module to the dependency graph"
-    
-    def add_dependency(
-            self,
-            dep: ModuleDependency  # TODO: Add description
-        ): # Add a dependency - TODO: Add type hint
-        "Add a dependency to the graph"
-    
-    def get_module_dependencies(self, module_name: str  # Module to query
-                                   ) -> List[ModuleDependency]:  # Dependencies
-        "Get all dependencies for a specific module"
-    
-    def get_module_dependents(self, module_name: str    # Module to query
-                                 ) -> List[ModuleDependency]:  # Dependents
-        "Get all modules that depend on a specific module"
-```
-
-### Auto-generation Utilities (`05_generators.ipynb`)
-
-> Auto-generate folder_name.ipynb notebooks for nbdev project
-> organization
-
-#### Import
-
-``` python
-# No corresponding Python module found for 05_generators
-```
-
-#### Functions
-
-``` python
-def create_folder_notebook(folder_path: Path,           # Path to folder
-                          title: str,                   # Notebook title
-                          description: str              # Folder description
-                          ) -> List[NbCell]:            # List of notebook cells
-    "Create cells for a folder notebook with proper nbdev structure"
-```
-
-``` python
-def generate_folder_notebook(folder_path: Path,         # Path to folder
-                           title: Optional[str] = None, # Custom title
-                           description: Optional[str] = None, # Custom description
-                           overwrite: bool = False      # Overwrite existing
-                           ) -> Path:                   # Path to created notebook
-    "Generate a folder_name.ipynb notebook for a folder"
-```
-
-``` python
-def generate_all_folder_notebooks(base_path: Path = None, # Base path (defaults to nbs)
-                                 recursive: bool = True,  # Include nested folders
-                                 overwrite: bool = False, # Overwrite existing
-                                 dry_run: bool = False    # Just show what would be created
-                                 ) -> List[Path]:         # Created notebook paths
-    "Generate folder notebooks for all folders that don't have them"
-```
-
-``` python
-def interactive_folder_notebook_generator(base_path: Path = None  # Base path
-                                        ) -> List[Path]:          # Created notebooks
-    "Interactively generate folder notebooks with custom titles and descriptions"
-```
-
-### Command-Line Interface (`06_cli.ipynb`)
-
-> CLI commands for nbdev project overview generation and analysis
-
-#### Import
-
-``` python
-# No corresponding Python module found for 06_cli
-```
-
-#### Functions
-
-``` python
-def tree_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Generate tree visualization for nbdev project"
-```
-
-``` python
-def api_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Generate API documentation for nbdev project"
-```
-
-``` python
-def deps_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Analyze and visualize module dependencies"
-```
-
-``` python
-def overview_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Generate complete project overview"
-```
-
-``` python
-def update_index_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Update index.ipynb with module documentation"
-```
-
-``` python
-def update_comprehensive_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
-    "Comprehensively update index.ipynb with all sections"
-```
-
-``` python
-def main(
-): # TODO: Add type hint
-    "Main CLI entry point for nbdev-overview"
 ```
