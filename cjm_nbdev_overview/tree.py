@@ -18,6 +18,16 @@ __all__ = ['ALIGNMENT_BUFFER', 'strip_markdown_links', 'generate_tree_lines', 'g
 ALIGNMENT_BUFFER = 1
 
 # %% ../nbs/tree.ipynb 6
+def _directory_has_notebooks(path: Path,                        # Directory to check
+                            exclude_index: bool = True          # Exclude index.ipynb from check
+                            ) -> bool:                          # True if contains notebooks
+    "Check if a directory contains any notebooks (directly or in subdirectories)"
+    notebooks = get_notebook_files(path, recursive=True)
+    if exclude_index:
+        notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
+    return len(notebooks) > 0
+
+#| export
 def strip_markdown_links(
     text: str  # TODO: Add description
 ) -> str:  # TODO: Add return description
@@ -33,7 +43,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
                        show_notebooks_only: bool = False,   # Only show notebooks, not directories
                        max_depth: Optional[int] = None,     # Maximum depth to traverse
                        current_depth: int = 0,              # Current depth in traversal
-                       exclude_index: bool = True           # Exclude index.ipynb from tree
+                       exclude_index: bool = True,          # Exclude index.ipynb from tree
+                       exclude_empty: bool = True           # Exclude empty directories
                        ) -> List[str]:                      # Lines of tree output
     "Generate tree visualization lines for a directory"
     lines = []
@@ -44,6 +55,11 @@ def generate_tree_lines(path: Path,                         # Directory to visua
     
     # Get items to process
     subdirs = sorted([d for d in path.iterdir() if d.is_dir()])
+    
+    # Filter out empty directories if exclude_empty is True
+    if exclude_empty:
+        subdirs = [d for d in subdirs if _directory_has_notebooks(d, exclude_index)]
+    
     notebooks = get_notebook_files(path, recursive=False)
     
     # Filter out index.ipynb if exclude_index is True
@@ -69,7 +85,7 @@ def generate_tree_lines(path: Path,                         # Directory to visua
             next_prefix = prefix + ("    " if is_last_item else "│   ")
             child_lines = generate_tree_lines(
                 item, next_prefix, is_last_item, show_notebooks_only, 
-                max_depth, current_depth + 1, exclude_index
+                max_depth, current_depth + 1, exclude_index, exclude_empty
             )
             lines.extend(child_lines)
         else:
@@ -82,7 +98,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
                  max_depth: Optional[int] = None,       # Maximum depth to traverse
-                 exclude_index: bool = True             # Exclude index.ipynb from tree
+                 exclude_index: bool = True,            # Exclude index.ipynb from tree
+                 exclude_empty: bool = True             # Exclude empty directories
                  ) -> str:                              # Tree visualization as string
     "Generate a tree visualization for a directory"
     if path is None:
@@ -93,7 +110,7 @@ def generate_tree(path: Path = None,                    # Directory to visualize
     lines = [f"{path.name}/"]
     
     # Generate tree lines
-    tree_lines = generate_tree_lines(path, "", True, show_notebooks_only, max_depth, 0, exclude_index)
+    tree_lines = generate_tree_lines(path, "", True, show_notebooks_only, max_depth, 0, exclude_index, exclude_empty)
     lines.extend(tree_lines)
     
     return '\n'.join(lines)
@@ -162,7 +179,8 @@ def extract_notebook_info(path: Path                    # Path to notebook file
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
                                    max_depth: Optional[int] = None, # Maximum depth to traverse
-                                   exclude_index: bool = True       # Exclude index.ipynb from tree
+                                   exclude_index: bool = True,       # Exclude index.ipynb from tree
+                                   exclude_empty: bool = True        # Exclude empty directories
                                    ) -> str:                        # Tree with descriptions
     "Generate tree visualization with descriptions from notebooks"
     if path is None:
@@ -171,8 +189,13 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
     
     lines = []
     
-    # Check if this is a flat structure (no subdirectories)
+    # Check if this is a flat structure (no subdirectories with notebooks)
     subdirs = get_subdirectories(path, recursive=False)
+    
+    # Filter out empty directories if exclude_empty is True
+    if exclude_empty:
+        subdirs = [d for d in subdirs if _directory_has_notebooks(d, exclude_index)]
+    
     is_flat = len(subdirs) == 0
     
     if is_flat:
@@ -225,7 +248,7 @@ def generate_tree_with_descriptions(path: Path = None,              # Directory 
     else:
         # Nested structure - show directories with counts and descriptions
         lines.append(f"{path.name}/")
-        lines.extend(_generate_nested_tree_lines(path, "", show_counts, max_depth, 0, exclude_index))
+        lines.extend(_generate_nested_tree_lines(path, "", show_counts, max_depth, 0, exclude_index, exclude_empty))
     
     return '\n'.join(lines)
 
@@ -235,7 +258,8 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
                                show_counts: bool = True,            # Show notebook counts
                                max_depth: Optional[int] = None,     # Maximum depth
                                current_depth: int = 0,              # Current depth
-                               exclude_index: bool = True           # Exclude index.ipynb from tree
+                               exclude_index: bool = True,          # Exclude index.ipynb from tree
+                               exclude_empty: bool = True           # Exclude empty directories
                                ) -> List[str]:                      # Tree lines
     "Generate tree lines for nested directory structure"
     lines = []
@@ -246,6 +270,11 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
     
     # Get subdirectories and notebooks
     subdirs = get_subdirectories(path, recursive=False)
+    
+    # Filter out empty directories if exclude_empty is True
+    if exclude_empty:
+        subdirs = [d for d in subdirs if _directory_has_notebooks(d, exclude_index)]
+    
     notebooks = get_notebook_files(path, recursive=False)
     
     # Filter out index.ipynb if exclude_index is True
@@ -308,7 +337,7 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
             next_prefix = prefix + ("    " if is_last else "│   ")
             child_lines = _generate_nested_tree_lines(
                 item, next_prefix, show_counts, max_depth, 
-                current_depth + 1, exclude_index
+                current_depth + 1, exclude_index, exclude_empty
             )
             lines.extend(child_lines)
         else:
@@ -323,7 +352,9 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
 
 # %% ../nbs/tree.ipynb 22
 def generate_subdirectory_tree(subdir_path: Path,               # Path to subdirectory
-                              show_descriptions: bool = True    # Include notebook descriptions
+                              show_descriptions: bool = True,   # Include notebook descriptions
+                              exclude_empty: bool = True,       # Exclude empty directories
+                              exclude_index: bool = True        # Exclude index.ipynb
                               ) -> str:                         # Tree visualization
     "Generate tree visualization for a specific subdirectory showing all notebooks"
     lines = [f"{subdir_path.name}/"]
@@ -333,11 +364,21 @@ def generate_subdirectory_tree(subdir_path: Path,               # Path to subdir
     
     # Get subdirectories
     subdirs = get_subdirectories(subdir_path, recursive=False)
+    
+    # Filter out empty directories if exclude_empty is True
+    if exclude_empty:
+        subdirs = [d for d in subdirs if _directory_has_notebooks(d, exclude_index)]
+    
     for subdir in subdirs:
         items.append((subdir, True))
     
     # Get notebooks
     notebooks = get_notebook_files(subdir_path, recursive=False)
+    
+    # Filter out index.ipynb if exclude_index is True
+    if exclude_index:
+        notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
+    
     for notebook in notebooks:
         items.append((notebook, False))
     
@@ -360,7 +401,8 @@ def generate_subdirectory_tree(subdir_path: Path,               # Path to subdir
     for i, (item, is_dir) in enumerate(items):
         is_last = (i == len(items) - 1)
         lines.extend(_generate_subdirectory_lines(
-            item, "", is_last, is_dir, show_descriptions, 0, max_length
+            item, "", is_last, is_dir, show_descriptions, 0, max_length,
+            exclude_empty, exclude_index
         ))
     
     return '\n'.join(lines)
@@ -372,7 +414,9 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
                                 is_dir: bool,                   # Is directory
                                 show_descriptions: bool,        # Show descriptions
                                 depth: int,                     # Current depth
-                                max_length: int = 0             # Max length for alignment (calculated externally)
+                                max_length: int = 0,            # Max length for alignment (calculated externally)
+                                exclude_empty: bool = True,     # Exclude empty directories
+                                exclude_index: bool = True      # Exclude index.ipynb
                                 ) -> List[str]:                 # Tree lines
     "Generate tree lines for subdirectory visualization"
     lines = []
@@ -381,6 +425,10 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
     extension = "    " if is_last else "│   "
     
     if is_dir:
+        # Check if directory has notebooks before including it
+        if exclude_empty and not _directory_has_notebooks(item, exclude_index):
+            return lines  # Skip empty directory
+        
         # Directory entry
         line = f"{prefix}{connector}{item.name}/"
         lines.append(line)
@@ -390,11 +438,21 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
         
         # Get nested subdirectories
         subdirs = get_subdirectories(item, recursive=False)
+        
+        # Filter out empty directories if exclude_empty is True
+        if exclude_empty:
+            subdirs = [d for d in subdirs if _directory_has_notebooks(d, exclude_index)]
+        
         for subdir in subdirs:
             sub_items.append((subdir, True))
         
         # Get notebooks in subdirectory
         notebooks = get_notebook_files(item, recursive=False)
+        
+        # Filter out index.ipynb if exclude_index is True
+        if exclude_index:
+            notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
+        
         for notebook in notebooks:
             sub_items.append((notebook, False))
         
@@ -417,7 +475,8 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
             sub_is_last = (j == len(sub_items) - 1)
             lines.extend(_generate_subdirectory_lines(
                 sub_item, prefix + extension, sub_is_last, 
-                sub_is_dir, show_descriptions, depth + 1, local_max_length
+                sub_is_dir, show_descriptions, depth + 1, local_max_length,
+                exclude_empty, exclude_index
             ))
     else:
         # Notebook entry

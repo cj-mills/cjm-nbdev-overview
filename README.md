@@ -57,21 +57,21 @@ graph LR
     parsers[parsers<br/>Notebook and Module Parsing]
     tree[tree<br/>Directory Tree Visualization]
 
-    api_docs --> tree
     api_docs --> core
-    api_docs --> dependencies
     api_docs --> parsers
-    cli --> tree
+    api_docs --> tree
+    api_docs --> dependencies
     cli --> parsers
     cli --> api_docs
+    cli --> tree
     cli --> dependencies
     dependencies --> dependencies
     dependencies --> core
     dependencies --> parsers
     generators --> tree
     generators --> core
-    parsers --> tree
     parsers --> core
+    parsers --> tree
     tree --> core
 ```
 
@@ -740,6 +740,13 @@ from cjm_nbdev_overview.tree import (
 #### Functions
 
 ``` python
+def _directory_has_notebooks(path: Path,                        # Directory to check
+                            exclude_index: bool = True          # Exclude index.ipynb from check
+                            ) -> bool:                          # True if contains notebooks
+    "Check if a directory contains any notebooks (directly or in subdirectories)"
+```
+
+``` python
 def strip_markdown_links(
     text: str  # TODO: Add description
 ) -> str:  # TODO: Add return description
@@ -753,7 +760,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
                        show_notebooks_only: bool = False,   # Only show notebooks, not directories
                        max_depth: Optional[int] = None,     # Maximum depth to traverse
                        current_depth: int = 0,              # Current depth in traversal
-                       exclude_index: bool = True           # Exclude index.ipynb from tree
+                       exclude_index: bool = True,          # Exclude index.ipynb from tree
+                       exclude_empty: bool = True           # Exclude empty directories
                        ) -> List[str]:                      # Lines of tree output
     "Generate tree visualization lines for a directory"
 ```
@@ -762,7 +770,8 @@ def generate_tree_lines(path: Path,                         # Directory to visua
 def generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)
                  show_notebooks_only: bool = False,     # Only show notebooks, not directories
                  max_depth: Optional[int] = None,       # Maximum depth to traverse
-                 exclude_index: bool = True             # Exclude index.ipynb from tree
+                 exclude_index: bool = True,            # Exclude index.ipynb from tree
+                 exclude_empty: bool = True             # Exclude empty directories
                  ) -> str:                              # Tree visualization as string
     "Generate a tree visualization for a directory"
 ```
@@ -777,7 +786,8 @@ def extract_notebook_info(path: Path                    # Path to notebook file
 def generate_tree_with_descriptions(path: Path = None,              # Directory to visualize
                                    show_counts: bool = True,        # Show notebook counts for directories
                                    max_depth: Optional[int] = None, # Maximum depth to traverse
-                                   exclude_index: bool = True       # Exclude index.ipynb from tree
+                                   exclude_index: bool = True,       # Exclude index.ipynb from tree
+                                   exclude_empty: bool = True        # Exclude empty directories
                                    ) -> str:                        # Tree with descriptions
     "Generate tree visualization with descriptions from notebooks"
 ```
@@ -788,14 +798,17 @@ def _generate_nested_tree_lines(path: Path,                         # Directory 
                                show_counts: bool = True,            # Show notebook counts
                                max_depth: Optional[int] = None,     # Maximum depth
                                current_depth: int = 0,              # Current depth
-                               exclude_index: bool = True           # Exclude index.ipynb from tree
+                               exclude_index: bool = True,          # Exclude index.ipynb from tree
+                               exclude_empty: bool = True           # Exclude empty directories
                                ) -> List[str]:                      # Tree lines
     "Generate tree lines for nested directory structure"
 ```
 
 ``` python
 def generate_subdirectory_tree(subdir_path: Path,               # Path to subdirectory
-                              show_descriptions: bool = True    # Include notebook descriptions
+                              show_descriptions: bool = True,   # Include notebook descriptions
+                              exclude_empty: bool = True,       # Exclude empty directories
+                              exclude_index: bool = True        # Exclude index.ipynb
                               ) -> str:                         # Tree visualization
     "Generate tree visualization for a specific subdirectory showing all notebooks"
 ```
@@ -807,7 +820,9 @@ def _generate_subdirectory_lines(item: Path,                    # Item to proces
                                 is_dir: bool,                   # Is directory
                                 show_descriptions: bool,        # Show descriptions
                                 depth: int,                     # Current depth
-                                max_length: int = 0             # Max length for alignment (calculated externally)
+                                max_length: int = 0,            # Max length for alignment (calculated externally)
+                                exclude_empty: bool = True,     # Exclude empty directories
+                                exclude_index: bool = True      # Exclude index.ipynb
                                 ) -> List[str]:                 # Tree lines
     "Generate tree lines for subdirectory visualization"
 ```
