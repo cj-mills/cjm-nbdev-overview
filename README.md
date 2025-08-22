@@ -57,21 +57,21 @@ graph LR
     parsers[parsers<br/>Notebook and Module Parsing]
     tree[tree<br/>Directory Tree Visualization]
 
-    api_docs --> core
+    api_docs --> dependencies
     api_docs --> parsers
     api_docs --> tree
-    api_docs --> dependencies
-    cli --> parsers
+    api_docs --> core
     cli --> api_docs
     cli --> tree
     cli --> dependencies
+    cli --> parsers
     dependencies --> dependencies
-    dependencies --> core
     dependencies --> parsers
+    dependencies --> core
     generators --> tree
     generators --> core
-    parsers --> core
     parsers --> tree
+    parsers --> core
     tree --> core
 ```
 
@@ -584,23 +584,23 @@ from cjm_nbdev_overview.parsers import (
 #### Functions
 
 ``` python
-def extract_docments_signature(node: ast.FunctionDef,          # AST function node
-                              source_lines: List[str]          # Source code lines
-                              ) -> str:                        # Function signature
+def extract_docments_signature(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node
+                              source_lines: List[str]                               # Source code lines
+                              ) -> str:                                             # Function signature
     "Extract function signature with docments-style comments"
 ```
 
 ``` python
-def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node with decorators
-                     ) -> List[str]:                              # List of decorator names
+def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef]  # AST node with decorators
+                     ) -> List[str]:                                                    # List of decorator names
     "Parse decorators from an AST node"
 ```
 
 ``` python
-def parse_function(node: ast.FunctionDef,               # AST function node
-                  source_lines: List[str],              # Source code lines
-                  is_exported: bool = False             # Has #| export
-                  ) -> FunctionInfo:                    # Function information
+def parse_function(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node
+                  source_lines: List[str],                             # Source code lines
+                  is_exported: bool = False                            # Has #| export
+                  ) -> FunctionInfo:                                   # Function information
     "Parse a function definition from AST"
 ```
 
@@ -673,6 +673,7 @@ class FunctionInfo:
     docstring: Optional[str]  # Function docstring
     decorators: List[str] = field(...)  # List of decorators
     is_exported: bool = False  # Has #| export
+    is_async: bool = False  # Is an async function
     source_line: Optional[int]  # Line number in source
 ```
 

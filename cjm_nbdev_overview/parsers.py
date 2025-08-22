@@ -28,6 +28,7 @@ class FunctionInfo:
     docstring: Optional[str] = None               # Function docstring
     decorators: List[str] = field(default_factory=list)  # List of decorators
     is_exported: bool = False                     # Has #| export
+    is_async: bool = False                        # Is an async function
     source_line: Optional[int] = None             # Line number in source
 
 # %% ../nbs/parsers.ipynb 6
@@ -67,9 +68,9 @@ class ModuleInfo:
     imports: List[str] = field(default_factory=list)             # Import statements
 
 # %% ../nbs/parsers.ipynb 10
-def extract_docments_signature(node: ast.FunctionDef,          # AST function node
-                              source_lines: List[str]          # Source code lines
-                              ) -> str:                        # Function signature
+def extract_docments_signature(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node
+                              source_lines: List[str]                               # Source code lines
+                              ) -> str:                                             # Function signature
     "Extract function signature with docments-style comments"
     # Get the function definition lines
     start_line = node.lineno - 1
@@ -109,14 +110,19 @@ def extract_docments_signature(node: ast.FunctionDef,          # AST function no
         if signature.endswith(':'):
             signature = signature[:-1].strip()
         
+        # Ensure async keyword is preserved if present
+        if isinstance(node, ast.AsyncFunctionDef) and not signature.startswith('async '):
+            signature = 'async ' + signature
+        
         return signature
     
     # Fallback to basic signature
-    return f"def {node.name}(...)"
+    async_prefix = "async " if isinstance(node, ast.AsyncFunctionDef) else ""
+    return f"{async_prefix}def {node.name}(...)"
 
 # %% ../nbs/parsers.ipynb 11
-def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node with decorators
-                     ) -> List[str]:                              # List of decorator names
+def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef]  # AST node with decorators
+                     ) -> List[str]:                                                    # List of decorator names
     "Parse decorators from an AST node"
     decorators = []
     for decorator in node.decorator_list:
@@ -127,10 +133,10 @@ def _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node wit
     return decorators
 
 # %% ../nbs/parsers.ipynb 12
-def parse_function(node: ast.FunctionDef,               # AST function node
-                  source_lines: List[str],              # Source code lines
-                  is_exported: bool = False             # Has #| export
-                  ) -> FunctionInfo:                    # Function information
+def parse_function(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node
+                  source_lines: List[str],                             # Source code lines
+                  is_exported: bool = False                            # Has #| export
+                  ) -> FunctionInfo:                                   # Function information
     "Parse a function definition from AST"
     # Extract signature with docments
     signature = extract_docments_signature(node, source_lines)
@@ -141,12 +147,16 @@ def parse_function(node: ast.FunctionDef,               # AST function node
     # Get decorators
     decorators = _parse_decorators(node)
     
+    # Check if it's an async function
+    is_async = isinstance(node, ast.AsyncFunctionDef)
+    
     return FunctionInfo(
         name=node.name,
         signature=signature,
         docstring=docstring,
         decorators=decorators,
         is_exported=is_exported,
+        is_async=is_async,
         source_line=node.lineno
     )
 
@@ -158,7 +168,7 @@ def _parse_class_methods(node: ast.ClassDef,           # AST class node
     "Parse methods from a class definition"
     methods = []
     for item in node.body:
-        if isinstance(item, ast.FunctionDef):
+        if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
             method_info = parse_function(item, source_lines, is_exported)
             methods.append(method_info)
     return methods
@@ -359,7 +369,7 @@ def parse_code_cell(cell: Dict[str, Any]                       # Notebook code c
         
         # Only process top-level nodes
         for node in tree.body:
-            if isinstance(node, ast.FunctionDef):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 func_info = parse_function(node, source_lines, is_exported)
                 functions.append(func_info)
             
@@ -458,7 +468,7 @@ def parse_python_file(path: Path                        # Path to Python file
         
         # Parse all top-level definitions
         for node in tree.body:
-            if isinstance(node, ast.FunctionDef):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 func_info = parse_function(node, source_lines, True)
                 module_info.functions.append(func_info)
             
