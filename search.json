@@ -1,0 +1,492 @@
+[
+  {
+    "objectID": "parsers.html",
+    "href": "parsers.html",
+    "title": "Notebook and Module Parsing",
+    "section": "",
+    "text": "source\n\n\n\n FunctionInfo (name:str, signature:str, docstring:Optional[str]=None,\n               decorators:List[str]=&lt;factory&gt;, is_exported:bool=False,\n               is_async:bool=False, source_line:Optional[int]=None)\n\nInformation about a function\n\nsource\n\n\n\n\n VariableInfo (name:str, value:Optional[str]=None,\n               type_hint:Optional[str]=None, comment:Optional[str]=None,\n               is_exported:bool=False)\n\nInformation about a module-level variable\n\nsource\n\n\n\n\n ClassInfo (name:str, signature:str, docstring:Optional[str]=None,\n            methods:List[__main__.FunctionInfo]=&lt;factory&gt;,\n            decorators:List[str]=&lt;factory&gt;,\n            attributes:List[__main__.VariableInfo]=&lt;factory&gt;,\n            is_exported:bool=False, source_line:Optional[int]=None)\n\nInformation about a class\n\nsource\n\n\n\n\n ModuleInfo (path:pathlib.Path, name:str, title:Optional[str]=None,\n             description:Optional[str]=None,\n             functions:List[__main__.FunctionInfo]=&lt;factory&gt;,\n             classes:List[__main__.ClassInfo]=&lt;factory&gt;,\n             variables:List[__main__.VariableInfo]=&lt;factory&gt;,\n             imports:List[str]=&lt;factory&gt;)\n\nInformation about a module (notebook or Python file)",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "parsers.html#data-models-for-parsing",
+    "href": "parsers.html#data-models-for-parsing",
+    "title": "Notebook and Module Parsing",
+    "section": "",
+    "text": "source\n\n\n\n FunctionInfo (name:str, signature:str, docstring:Optional[str]=None,\n               decorators:List[str]=&lt;factory&gt;, is_exported:bool=False,\n               is_async:bool=False, source_line:Optional[int]=None)\n\nInformation about a function\n\nsource\n\n\n\n\n VariableInfo (name:str, value:Optional[str]=None,\n               type_hint:Optional[str]=None, comment:Optional[str]=None,\n               is_exported:bool=False)\n\nInformation about a module-level variable\n\nsource\n\n\n\n\n ClassInfo (name:str, signature:str, docstring:Optional[str]=None,\n            methods:List[__main__.FunctionInfo]=&lt;factory&gt;,\n            decorators:List[str]=&lt;factory&gt;,\n            attributes:List[__main__.VariableInfo]=&lt;factory&gt;,\n            is_exported:bool=False, source_line:Optional[int]=None)\n\nInformation about a class\n\nsource\n\n\n\n\n ModuleInfo (path:pathlib.Path, name:str, title:Optional[str]=None,\n             description:Optional[str]=None,\n             functions:List[__main__.FunctionInfo]=&lt;factory&gt;,\n             classes:List[__main__.ClassInfo]=&lt;factory&gt;,\n             variables:List[__main__.VariableInfo]=&lt;factory&gt;,\n             imports:List[str]=&lt;factory&gt;)\n\nInformation about a module (notebook or Python file)",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "parsers.html#ast-parsing-utilities",
+    "href": "parsers.html#ast-parsing-utilities",
+    "title": "Notebook and Module Parsing",
+    "section": "AST Parsing Utilities",
+    "text": "AST Parsing Utilities\n\nsource\n\nextract_docments_signature\n\n extract_docments_signature\n                             (node:Union[ast.FunctionDef,ast.AsyncFunction\n                             Def], source_lines:List[str])\n\nExtract function signature with docments-style comments\n\n\n\n\nType\nDetails\n\n\n\n\nnode\nUnion\nAST function node\n\n\nsource_lines\nList\nSource code lines\n\n\nReturns\nstr\nFunction signature\n\n\n\n\nsource\n\n\nparse_function\n\n parse_function (node:Union[ast.FunctionDef,ast.AsyncFunctionDef],\n                 source_lines:List[str], is_exported:bool=False)\n\nParse a function definition from AST\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nnode\nUnion\n\nAST function node\n\n\nsource_lines\nList\n\nSource code lines\n\n\nis_exported\nbool\nFalse\nHas #| export\n\n\nReturns\nFunctionInfo\n\nFunction information\n\n\n\n\nsource\n\n\nparse_class\n\n parse_class (node:ast.ClassDef, source_lines:List[str],\n              is_exported:bool=False)\n\nParse a class definition from AST\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nnode\nClassDef\n\nAST class node\n\n\nsource_lines\nList\n\nSource code lines\n\n\nis_exported\nbool\nFalse\nHas #| export\n\n\nReturns\nClassInfo\n\nClass information\n\n\n\n\nsource\n\n\nparse_variable\n\n parse_variable (node:Union[ast.Assign,ast.AnnAssign],\n                 source_lines:List[str], is_exported:bool=False)\n\nParse variable assignments from AST\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nnode\nUnion\n\nAST assignment node\n\n\nsource_lines\nList\n\nSource code lines\n\n\nis_exported\nbool\nFalse\nHas #| export\n\n\nReturns\nList\n\nVariable information",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "parsers.html#notebook-cell-parsing",
+    "href": "parsers.html#notebook-cell-parsing",
+    "title": "Notebook and Module Parsing",
+    "section": "Notebook Cell Parsing",
+    "text": "Notebook Cell Parsing\n\nsource\n\nparse_code_cell\n\n parse_code_cell (cell:Dict[str,Any])\n\nParse a notebook code cell for functions, classes, variables, and imports\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ncell\nDict\nNotebook code cell\n\n\nReturns\nTuple\n(functions, classes, variables, imports)",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "parsers.html#module-parsing",
+    "href": "parsers.html#module-parsing",
+    "title": "Notebook and Module Parsing",
+    "section": "Module Parsing",
+    "text": "Module Parsing\n\nsource\n\nparse_notebook\n\n parse_notebook (path:pathlib.Path)\n\nParse a notebook file for module information\n\n\n\n\nType\nDetails\n\n\n\n\npath\nPath\nPath to notebook\n\n\nReturns\nModuleInfo\nModule information\n\n\n\n\nsource\n\n\nparse_python_file\n\n parse_python_file (path:pathlib.Path)\n\nParse a Python file for module information\n\n\n\n\nType\nDetails\n\n\n\n\npath\nPath\nPath to Python file\n\n\nReturns\nModuleInfo\nModule information",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "parsers.html#testing",
+    "href": "parsers.html#testing",
+    "title": "Notebook and Module Parsing",
+    "section": "Testing",
+    "text": "Testing\nLet’s test the parser on our own notebooks:\n\n# Test parsing the core module\ncore_info = parse_notebook(Path(\"core.ipynb\"))\nprint(f\"Module: {core_info.name}\")\nprint(f\"Title: {core_info.title}\")\nprint(f\"Description: {core_info.description}\")\nprint(f\"\\nFunctions ({len(core_info.functions)}):\")\nfor func in core_info.functions[:3]:  # Show first 3\n    print(f\"  - {func.name}\")\nprint(f\"\\nClasses ({len(core_info.classes)}):\")\nfor cls in core_info.classes[:3]:  # Show first 3\n    print(f\"  - {cls.name}\")\n    \nprint(f\"\\nTesting refactored parse_class function...\")\nprint(\"Class signatures:\")\nfor cls in core_info.classes:\n    print(f\"\\n{cls.name}:\")\n    print(f\"  Decorators: {cls.decorators}\")\n    print(f\"  Methods: {[m.name for m in cls.methods]}\")\n    print(f\"  Attributes: {[a.name for a in cls.attributes]}\")\n    print(f\"  Signature: {cls.signature[:100]}...\")  # First 100 chars\n\nModule: core\nTitle: Core Utilities\nDescription: Core utilities and data models for nbdev project overview generation\n\nFunctions (4):\n  - get_notebook_files\n  - get_subdirectories\n  - read_notebook\n\nClasses (2):\n  - NotebookInfo\n  - DirectoryInfo\n\nTesting refactored parse_class function...\nClass signatures:\n\nNotebookInfo:\n  Decorators: ['dataclass']\n  Methods: ['relative_path']\n  Attributes: ['path', 'name', 'title', 'description', 'export_module']\n  Signature: class NotebookInfo:...\n\nDirectoryInfo:\n  Decorators: ['dataclass']\n  Methods: ['total_notebook_count']\n  Attributes: ['path', 'name', 'notebook_count', 'description', 'subdirs', 'notebooks']\n  Signature: class DirectoryInfo:...\n\n\n\n# Test extracting function signatures\nprint(\"Function signatures with docments:\")\nfor func in core_info.functions[:2]:\n    print(f\"\\n{func.name}:\")\n    print(func.signature)\n\nFunction signatures with docments:\n\nget_notebook_files:\ndef get_notebook_files(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = True        # Search subdirectories\n                      ) -&gt; List[Path]:              # List of notebook paths\n\nget_subdirectories:\ndef get_subdirectories(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = False       # Include all nested subdirectories\n                      ) -&gt; List[Path]:              # List of directory paths",
+    "crumbs": [
+      "Notebook and Module Parsing"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-nbdev-overview",
+    "section": "",
+    "text": "pip install cjm-nbdev-overview",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-nbdev-overview",
+    "section": "",
+    "text": "pip install cjm-nbdev-overview",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "cjm-nbdev-overview",
+    "section": "How to use",
+    "text": "How to use\n\nAutomatic Module Documentation\nThis project includes functionality to automatically update your index.ipynb with comprehensive module documentation. You can either:\n\nUse the CLI command:\nnbdev-overview update-index\nUse the Python API:\nfrom cjm_nbdev_overview.api_docs import update_index_module_docs\nupdate_index_module_docs()\n\nThis will add a “Module Overview” section to your index.ipynb containing detailed documentation for all modules in your project.",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-nbdev-overview",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n├── api_docs.ipynb     # Generate module overviews with formatted signatures for nbdev projects\n├── cli.ipynb          # CLI commands for nbdev project overview generation and analysis\n├── core.ipynb         # Core utilities and data models for nbdev project overview generation\n├── dependencies.ipynb # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams\n├── generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization\n├── parsers.ipynb      # Parse notebook metadata, content, and extract function/class signatures with docments\n└── tree.ipynb         # Generate tree visualizations for nbdev project structure\nTotal: 7 notebooks",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-nbdev-overview",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    api_docs[api_docs&lt;br/&gt;API Documentation Generation]\n    cli[cli&lt;br/&gt;Command-Line Interface]\n    core[core&lt;br/&gt;Core Utilities]\n    dependencies[dependencies&lt;br/&gt;Dependency Analysis and Visualization]\n    generators[generators&lt;br/&gt;Auto-generation Utilities]\n    parsers[parsers&lt;br/&gt;Notebook and Module Parsing]\n    tree[tree&lt;br/&gt;Directory Tree Visualization]\n\n    api_docs --&gt; parsers\n    api_docs --&gt; tree\n    api_docs --&gt; dependencies\n    api_docs --&gt; core\n    cli --&gt; tree\n    cli --&gt; api_docs\n    cli --&gt; parsers\n    cli --&gt; dependencies\n    dependencies --&gt; dependencies\n    dependencies --&gt; parsers\n    dependencies --&gt; core\n    generators --&gt; tree\n    generators --&gt; core\n    parsers --&gt; tree\n    parsers --&gt; core\n    tree --&gt; core\n16 cross-module dependencies detected",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-nbdev-overview",
+    "section": "CLI Reference",
+    "text": "CLI Reference\n\nnbdev-overview Command\nusage: nbdev-overview [-h]\n                      {tree,api,deps,overview,update-index,update-comprehensive}\n                      ...\n\nGenerate comprehensive overviews for nbdev projects\n\npositional arguments:\n  {tree,api,deps,overview,update-index,update-comprehensive}\n                        Available commands\n    tree                Generate directory tree visualization\n    api                 Generate API documentation\n    deps                Analyze module dependencies\n    overview            Generate complete project overview\n    update-index        Update index.ipynb with module documentation\n    update-comprehensive\n                        Comprehensive update of index.ipynb with all sections\n\noptions:\n  -h, --help            show this help message and exit\n\nFor detailed help on any command, use nbdev-overview &lt;command&gt; --help.",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-nbdev-overview",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\nAPI Documentation Generation (api_docs.ipynb)\n\nGenerate module overviews with formatted signatures for nbdev projects\n\n\nImport\nfrom cjm_nbdev_overview.api_docs import (\n    format_function_doc,\n    format_class_doc,\n    format_variable_doc,\n    generate_module_overview,\n    generate_project_api_docs,\n    update_index_module_docs,\n    add_project_structure_section,\n    add_dependencies_section,\n    add_cli_reference_section,\n    update_index_comprehensive\n)\n\n\nFunctions\ndef format_function_doc(func: FunctionInfo,             # Function information\n                       indent: str = \"\"                 # Indentation prefix\n                       ) -&gt; str:                        # Formatted documentation\n    \"Format a function with its signature for documentation\"\ndef format_class_doc(cls: ClassInfo                     # Class information\n                    ) -&gt; str:                           # Formatted documentation\n    \"Format a class with its signature and methods for documentation\"\ndef format_variable_doc(var: VariableInfo               # Variable information\n                       ) -&gt; str:                        # Formatted documentation\n    \"Format a variable for documentation\"\ndef _generate_module_header(module: ModuleInfo          # Module information\n                          ) -&gt; List[str]:               # Header lines\n    \"Generate module title and description lines\"\ndef _generate_import_statement(module: ModuleInfo       # Module information\n                             ) -&gt; List[str]:            # Import statement lines\n    \"Generate import statement lines for a module\"\ndef _filter_module_items(module: ModuleInfo,            # Module information\n                        show_all: bool = False          # Show all items including private\n                        ) -&gt; tuple:                     # (functions, classes, variables)\n    \"Filter module items based on show_all and is_exported flags\"\ndef _generate_functions_section(functions: List[FunctionInfo]   # List of functions\n                              ) -&gt; List[str]:                   # Section lines\n    \"Generate the functions section of module documentation\"\ndef _generate_classes_section(classes: List[ClassInfo]          # List of classes\n                            ) -&gt; List[str]:                     # Section lines\n    \"Generate the classes section of module documentation\"\ndef _generate_variables_section(variables: List[VariableInfo]   # List of variables\n                              ) -&gt; List[str]:                   # Section lines\n    \"Generate the variables section of module documentation\"\ndef generate_module_overview(module: ModuleInfo,        # Module information\n                           show_all: bool = False       # Show all items including private\n                           ) -&gt; str:                    # Module overview markdown\n    \"Generate a markdown overview for a module\"\ndef generate_project_api_docs(path: Path = None,        # Project path (defaults to nbs_path)\n                            show_all: bool = False      # Show all items including private\n                            ) -&gt; str:                   # Full API documentation\n    \"Generate API documentation for all modules in a project\"\ndef _filter_cells_removing_sections(cells: List,               # List of notebook cells\n                                   start_marker: str            # Section marker to remove\n                                   ) -&gt; List:                   # Filtered cells\n    \"Remove all cells from a section marked by start_marker until the next ## section\"\ndef _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths\n                             ) -&gt; List[Path]:                   # Sorted notebook paths\n    \"Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end\"\ndef _get_notebooks_with_exports(notebooks: List[Path]          # List of notebook paths\n                               ) -&gt; List[Path]:                 # Notebooks with exported content\n    \"Filter notebooks to only include those with exported content\"\ndef _generate_module_overview_cells(notebooks: List[Path]      # List of notebook paths\n                                   ) -&gt; List:                   # List of notebook cells\n    \"Generate markdown cells containing module overview documentation\"\ndef update_index_module_docs(index_path: Path = None,          # Path to index.ipynb (defaults to nbs/index.ipynb)\n                           start_marker: str = \"## Module Overview\"  # Marker to identify module docs section\n                           ) -&gt; None:                          # Updates index.ipynb in place\n    \"Update the module documentation section in index.ipynb\"\ndef add_project_structure_section(index_path: Path = None,      # Path to index.ipynb\n                                 marker: str = \"## Project Structure\",  # Section marker\n                                 exclude_index: bool = True     # Exclude index.ipynb from tree\n                                 ) -&gt; str:                       # Generated structure content\n    \"Generate project structure tree content for index.ipynb\"\ndef add_dependencies_section(index_path: Path = None,           # Path to index.ipynb\n                           marker: str = \"## Module Dependencies\", # Section marker\n                           direction: str = \"LR\"                # Diagram direction\n                           ) -&gt; str:                            # Generated dependencies content\n    \"Generate module dependencies diagram content for index.ipynb\"\ndef add_cli_reference_section(marker: str = \"## CLI Reference\"  # Section marker\n                            ) -&gt; str:                           # Generated CLI content\n    \"Generate CLI reference content for index.ipynb based on project's console scripts\"\ndef update_index_comprehensive(index_path: Path = None,         # Path to index.ipynb\n                              include_structure: bool = True,  # Include project structure\n                              include_dependencies: bool = True, # Include module dependencies\n                              include_cli: bool = True,         # Include CLI reference\n                              include_modules: bool = True      # Include module documentation\n                              ) -&gt; None:                        # Updates index.ipynb in place\n    \"Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules\"\n\n\n\nCommand-Line Interface (cli.ipynb)\n\nCLI commands for nbdev project overview generation and analysis\n\n\nImport\nfrom cjm_nbdev_overview.cli import (\n    tree_cmd,\n    api_cmd,\n    deps_cmd,\n    overview_cmd,\n    update_index_cmd,\n    update_comprehensive_cmd,\n    main\n)\n\n\nFunctions\ndef tree_cmd(args:argparse.Namespace  # Parsed command line arguments\n            ):                         # None\n    \"Generate tree visualization for nbdev project\"\ndef api_cmd(args:argparse.Namespace  # Parsed command line arguments\n           ):                         # None\n    \"Generate API documentation for nbdev project\"\ndef deps_cmd(args:argparse.Namespace  # Parsed command line arguments\n            ):                         # None\n    \"Analyze and visualize module dependencies\"\ndef overview_cmd(args:argparse.Namespace  # Parsed command line arguments\n                ):                         # None\n    \"Generate complete project overview\"\ndef update_index_cmd(args:argparse.Namespace  # Parsed command line arguments\n                    ):                         # None\n    \"Update index.ipynb with module documentation\"\ndef update_comprehensive_cmd(args:argparse.Namespace  # Parsed command line arguments\n                            ):                         # None\n    \"Comprehensively update index.ipynb with all sections\"\ndef main():  # None\n    \"Main CLI entry point for nbdev-overview\"\n\n\n\nCore Utilities (core.ipynb)\n\nCore utilities and data models for nbdev project overview generation\n\n\nImport\nfrom cjm_nbdev_overview.core import (\n    NotebookInfo,\n    DirectoryInfo,\n    get_notebook_files,\n    get_subdirectories,\n    read_notebook,\n    get_cell_source\n)\n\n\nFunctions\ndef get_notebook_files(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = True        # Search subdirectories\n                      ) -&gt; List[Path]:              # List of notebook paths\n    \"Get all notebook files in a directory\"\ndef get_subdirectories(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = False       # Include all nested subdirectories\n                      ) -&gt; List[Path]:              # List of directory paths\n    \"Get subdirectories in a directory\"\ndef read_notebook(path: Path                    # Path to notebook file\n                 ) -&gt; Dict[str, Any]:           # Notebook content as dict\n    \"Read a notebook file and return its content\"\ndef get_cell_source(cell: Dict[str, Any]        # Notebook cell\n                   ) -&gt; str:                    # Cell source as string\n    \"Get source from a notebook cell\"\n\n\nClasses\n@dataclass\nclass NotebookInfo:\n    \"Information about a single notebook\"\n    \n    path: Path  # Path to the notebook file\n    name: str  # Notebook filename without extension\n    title: Optional[str]  # H1 title from first cell\n    description: Optional[str]  # Blockquote description from first cell\n    export_module: Optional[str]  # Module name from default_exp\n    \n    def relative_path(self) -&gt; Path:       # Path relative to nbs directory\n        \"Get path relative to nbs directory\"\n@dataclass\nclass DirectoryInfo:\n    \"Information about a directory in the nbs folder\"\n    \n    path: Path  # Path to the directory\n    name: str  # Directory name\n    notebook_count: int = 0  # Number of notebooks in directory\n    description: Optional[str]  # Description from folder's main notebook\n    subdirs: List[DirectoryInfo] = field(...)  # Subdirectories\n    notebooks: List[NotebookInfo] = field(...)  # Notebooks in this directory\n    \n    def total_notebook_count(self) -&gt; int:          # Total notebooks including subdirs\n        \"Get total notebook count including subdirectories\"\n\n\n\nDependency Analysis and Visualization (dependencies.ipynb)\n\nAnalyze cross-notebook imports and generate Mermaid.js dependency diagrams\n\n\nImport\nfrom cjm_nbdev_overview.dependencies import (\n    ModuleDependency,\n    DependencyGraph,\n    extract_project_imports,\n    analyze_module_dependencies,\n    build_dependency_graph,\n    generate_mermaid_diagram,\n    generate_dependency_matrix\n)\n\n\nFunctions\ndef extract_project_imports(import_str: str,            # Import statement\n                           project_name: str            # Project package name\n                           ) -&gt; Optional[ModuleDependency]:  # Dependency if internal\n    \"Extract project-internal imports from an import statement\"\ndef analyze_module_dependencies(module: ModuleInfo,     # Module to analyze\n                               project_name: str        # Project package name\n                               ) -&gt; List[ModuleDependency]:  # Dependencies found\n    \"Analyze a module's imports to find project-internal dependencies\"\ndef build_dependency_graph(path: Path = None,           # Project path\n                          project_name: Optional[str] = None  # Override project name\n                          ) -&gt; DependencyGraph:         # Dependency graph\n    \"Build a dependency graph for all modules in a project\"\ndef generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph\n                           direction: str = \"TD\",       # Diagram direction (TD/LR)\n                           show_imports: bool = False   # Show imported names\n                           ) -&gt; str:                    # Mermaid diagram code\n    \"Generate a Mermaid.js dependency diagram from a dependency graph\"\ndef generate_dependency_matrix(graph: DependencyGraph   # Dependency graph\n                              ) -&gt; str:                 # Markdown table\n    \"Generate a dependency matrix showing which modules depend on which\"\n\n\nClasses\n@dataclass\nclass ModuleDependency:\n    \"Represents a dependency between modules\"\n    \n    source: str  # Source module name\n    target: str  # Target module name\n    import_type: str  # Type of import (from/import)\n    imported_names: List[str] = field(...)  # Specific names imported\n@dataclass\nclass DependencyGraph:\n    \"Dependency graph for a project\"\n    \n    modules: Dict[str, ModuleInfo] = field(...)  # Module name -&gt; ModuleInfo\n    dependencies: List[ModuleDependency] = field(...)  # All dependencies\n    \n    def add_module(self,\n                       module:ModuleInfo  # Module to add to the graph\n                       ):                  # None\n        \"Add a module to the dependency graph\"\n    \n    def add_dependency(self,\n                           dep:ModuleDependency  # Dependency to add\n                           ):                     # None\n        \"Add a dependency to the graph\"\n    \n    def get_module_dependencies(self, module_name: str  # Module to query\n                                   ) -&gt; List[ModuleDependency]:  # Dependencies\n        \"Get all dependencies for a specific module\"\n    \n    def get_module_dependents(self, module_name: str    # Module to query\n                                 ) -&gt; List[ModuleDependency]:  # Dependents\n        \"Get all modules that depend on a specific module\"\n\n\n\nAuto-generation Utilities (generators.ipynb)\n\nAuto-generate folder_name.ipynb notebooks for nbdev project organization\n\n\nImport\nfrom cjm_nbdev_overview.generators import (\n    create_folder_notebook,\n    generate_folder_notebook,\n    generate_all_folder_notebooks,\n    interactive_folder_notebook_generator\n)\n\n\nFunctions\ndef create_folder_notebook(folder_path: Path,           # Path to folder\n                          title: str,                   # Notebook title\n                          description: str              # Folder description\n                          ) -&gt; List[NbCell]:            # List of notebook cells\n    \"Create cells for a folder notebook with proper nbdev structure\"\ndef generate_folder_notebook(folder_path: Path,         # Path to folder\n                           title: Optional[str] = None, # Custom title\n                           description: Optional[str] = None, # Custom description\n                           overwrite: bool = False      # Overwrite existing\n                           ) -&gt; Path:                   # Path to created notebook\n    \"Generate a folder_name.ipynb notebook for a folder\"\ndef generate_all_folder_notebooks(base_path: Path = None, # Base path (defaults to nbs)\n                                 recursive: bool = True,  # Include nested folders\n                                 overwrite: bool = False, # Overwrite existing\n                                 dry_run: bool = False    # Just show what would be created\n                                 ) -&gt; List[Path]:         # Created notebook paths\n    \"Generate folder notebooks for all folders that don't have them\"\ndef interactive_folder_notebook_generator(base_path: Path = None  # Base path\n                                        ) -&gt; List[Path]:          # Created notebooks\n    \"Interactively generate folder notebooks with custom titles and descriptions\"\n\n\n\nNotebook and Module Parsing (parsers.ipynb)\n\nParse notebook metadata, content, and extract function/class signatures with docments\n\n\nImport\nfrom cjm_nbdev_overview.parsers import (\n    FunctionInfo,\n    VariableInfo,\n    ClassInfo,\n    ModuleInfo,\n    extract_docments_signature,\n    parse_function,\n    parse_class,\n    parse_variable,\n    parse_code_cell,\n    parse_notebook,\n    parse_python_file\n)\n\n\nFunctions\ndef extract_docments_signature(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node\n                              source_lines: List[str]                               # Source code lines\n                              ) -&gt; str:                                             # Function signature\n    \"Extract function signature with docments-style comments\"\ndef _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef]  # AST node with decorators\n                     ) -&gt; List[str]:                                                    # List of decorator names\n    \"Parse decorators from an AST node\"\ndef parse_function(node: Union[ast.FunctionDef, ast.AsyncFunctionDef],  # AST function node\n                  source_lines: List[str],                             # Source code lines\n                  is_exported: bool = False                            # Has #| export\n                  ) -&gt; FunctionInfo:                                   # Function information\n    \"Parse a function definition from AST\"\ndef _parse_class_methods(node: ast.ClassDef,           # AST class node\n                        source_lines: List[str],        # Source code lines\n                        is_exported: bool = False       # Has #| export\n                        ) -&gt; List[FunctionInfo]:        # List of method information\n    \"Parse methods from a class definition\"\ndef _parse_dataclass_attributes(node: ast.ClassDef,    # AST class node\n                               source_lines: List[str], # Source code lines\n                               is_exported: bool = False # Has #| export\n                               ) -&gt; List[VariableInfo]: # List of attribute information\n    \"Parse dataclass attributes from a class definition\"\ndef _generate_class_signature(node: ast.ClassDef,      # AST class node\n                             methods: List[FunctionInfo] # List of class methods\n                             ) -&gt; str:                  # Class signature\n    \"Generate a class signature including __init__ if present\"\ndef parse_class(node: ast.ClassDef,                    # AST class node\n               source_lines: List[str],                # Source code lines\n               is_exported: bool = False               # Has #| export\n               ) -&gt; ClassInfo:                         # Class information\n    \"Parse a class definition from AST\"\ndef parse_variable(node: Union[ast.Assign, ast.AnnAssign],    # AST assignment node\n                  source_lines: List[str],                     # Source code lines\n                  is_exported: bool = False                    # Has #| export\n                  ) -&gt; List[VariableInfo]:                     # Variable information\n    \"Parse variable assignments from AST\"\ndef parse_code_cell(cell: Dict[str, Any]                       # Notebook code cell\n                   ) -&gt; Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:  # (functions, classes, variables, imports)\n    \"Parse a notebook code cell for functions, classes, variables, and imports\"\ndef parse_notebook(path: Path                           # Path to notebook\n                  ) -&gt; ModuleInfo:                      # Module information\n    \"Parse a notebook file for module information\"\ndef parse_python_file(path: Path                        # Path to Python file\n                     ) -&gt; ModuleInfo:                   # Module information\n    \"Parse a Python file for module information\"\n\n\nClasses\n@dataclass\nclass FunctionInfo:\n    \"Information about a function\"\n    \n    name: str  # Function name\n    signature: str  # Full signature with docments\n    docstring: Optional[str]  # Function docstring\n    decorators: List[str] = field(...)  # List of decorators\n    is_exported: bool = False  # Has #| export\n    is_async: bool = False  # Is an async function\n    source_line: Optional[int]  # Line number in source\n@dataclass\nclass VariableInfo:\n    \"Information about a module-level variable\"\n    \n    name: str  # Variable name\n    value: Optional[str]  # String representation of value\n    type_hint: Optional[str]  # Type annotation if present\n    comment: Optional[str]  # Inline comment\n    is_exported: bool = False  # Has #| export\n@dataclass\nclass ClassInfo:\n    \"Information about a class\"\n    \n    name: str  # Class name\n    signature: str  # Class signature with __init__\n    docstring: Optional[str]  # Class docstring\n    methods: List[FunctionInfo] = field(...)  # Class methods\n    decorators: List[str] = field(...)  # Class decorators\n    attributes: List[VariableInfo] = field(...)  # Class attributes (for dataclasses)\n    is_exported: bool = False  # Has #| export\n    source_line: Optional[int]  # Line number in source\n@dataclass\nclass ModuleInfo:\n    \"Information about a module (notebook or Python file)\"\n    \n    path: Path  # Path to module\n    name: str  # Module name\n    title: Optional[str]  # H1 title from notebook\n    description: Optional[str]  # Module description\n    functions: List[FunctionInfo] = field(...)  # Functions in module\n    classes: List[ClassInfo] = field(...)  # Classes in module\n    variables: List[VariableInfo] = field(...)  # Variables in module\n    imports: List[str] = field(...)  # Import statements\n\n\n\nDirectory Tree Visualization (tree.ipynb)\n\nGenerate tree visualizations for nbdev project structure\n\n\nImport\nfrom cjm_nbdev_overview.tree import (\n    ALIGNMENT_BUFFER,\n    strip_markdown_links,\n    generate_tree_lines,\n    generate_tree,\n    extract_notebook_info,\n    generate_tree_with_descriptions,\n    generate_subdirectory_tree,\n    get_tree_summary\n)\n\n\nFunctions\ndef _directory_has_notebooks(path: Path,                        # Directory to check\n                            exclude_index: bool = True          # Exclude index.ipynb from check\n                            ) -&gt; bool:                          # True if contains notebooks\n    \"Check if a directory contains any notebooks (directly or in subdirectories)\"\ndef strip_markdown_links(text:str  # Text that may contain Markdown links\n                         ) -&gt; str:  # Text with links removed, keeping link text\n    \"Strip Markdown links from text, keeping only the link text\"\ndef generate_tree_lines(path: Path,                         # Directory to visualize\n                       prefix: str = \"\",                    # Line prefix for tree structure\n                       is_last: bool = True,                # Is this the last item in parent\n                       show_notebooks_only: bool = False,   # Only show notebooks, not directories\n                       max_depth: Optional[int] = None,     # Maximum depth to traverse\n                       current_depth: int = 0,              # Current depth in traversal\n                       exclude_index: bool = True,          # Exclude index.ipynb from tree\n                       exclude_empty: bool = True           # Exclude empty directories\n                       ) -&gt; List[str]:                      # Lines of tree output\n    \"Generate tree visualization lines for a directory\"\ndef generate_tree(path: Path = None,                    # Directory to visualize (defaults to nbs_path)\n                 show_notebooks_only: bool = False,     # Only show notebooks, not directories\n                 max_depth: Optional[int] = None,       # Maximum depth to traverse\n                 exclude_index: bool = True,            # Exclude index.ipynb from tree\n                 exclude_empty: bool = True             # Exclude empty directories\n                 ) -&gt; str:                              # Tree visualization as string\n    \"Generate a tree visualization for a directory\"\ndef extract_notebook_info(path: Path                    # Path to notebook file\n                         ) -&gt; NotebookInfo:             # Notebook information\n    \"Extract title and description from a notebook\"\ndef generate_tree_with_descriptions(path: Path = None,              # Directory to visualize\n                                   show_counts: bool = True,        # Show notebook counts for directories\n                                   max_depth: Optional[int] = None, # Maximum depth to traverse\n                                   exclude_index: bool = True,       # Exclude index.ipynb from tree\n                                   exclude_empty: bool = True        # Exclude empty directories\n                                   ) -&gt; str:                        # Tree with descriptions\n    \"Generate tree visualization with descriptions from notebooks\"\ndef _generate_nested_tree_lines(path: Path,                         # Directory to process\n                               prefix: str = \"\",                    # Line prefix\n                               show_counts: bool = True,            # Show notebook counts\n                               max_depth: Optional[int] = None,     # Maximum depth\n                               current_depth: int = 0,              # Current depth\n                               exclude_index: bool = True,          # Exclude index.ipynb from tree\n                               exclude_empty: bool = True           # Exclude empty directories\n                               ) -&gt; List[str]:                      # Tree lines\n    \"Generate tree lines for nested directory structure\"\ndef generate_subdirectory_tree(subdir_path: Path,               # Path to subdirectory\n                              show_descriptions: bool = True,   # Include notebook descriptions\n                              exclude_empty: bool = True,       # Exclude empty directories\n                              exclude_index: bool = True        # Exclude index.ipynb\n                              ) -&gt; str:                         # Tree visualization\n    \"Generate tree visualization for a specific subdirectory showing all notebooks\"\ndef _generate_subdirectory_lines(item: Path,                    # Item to process\n                                prefix: str,                    # Line prefix\n                                is_last: bool,                  # Is last item\n                                is_dir: bool,                   # Is directory\n                                show_descriptions: bool,        # Show descriptions\n                                depth: int,                     # Current depth\n                                max_length: int = 0,            # Max length for alignment (calculated externally)\n                                exclude_empty: bool = True,     # Exclude empty directories\n                                exclude_index: bool = True      # Exclude index.ipynb\n                                ) -&gt; List[str]:                 # Tree lines\n    \"Generate tree lines for subdirectory visualization\"\ndef get_tree_summary(path: Path = None              # Directory to analyze\n                    ) -&gt; str:                       # Summary string\n    \"Get summary statistics for notebooks in directory tree\"\n\n\nVariables\nALIGNMENT_BUFFER = 1",
+    "crumbs": [
+      "cjm-nbdev-overview"
+    ]
+  },
+  {
+    "objectID": "api_docs.html",
+    "href": "api_docs.html",
+    "title": "API Documentation Generation",
+    "section": "",
+    "text": "source\n\n\n\n format_function_doc (func:cjm_nbdev_overview.parsers.FunctionInfo,\n                      indent:str='')\n\nFormat a function with its signature for documentation\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nfunc\nFunctionInfo\n\nFunction information\n\n\nindent\nstr\n\nIndentation prefix\n\n\nReturns\nstr\n\nFormatted documentation\n\n\n\n\nsource\n\n\n\n\n format_class_doc (cls:cjm_nbdev_overview.parsers.ClassInfo)\n\nFormat a class with its signature and methods for documentation\n\n\n\n\nType\nDetails\n\n\n\n\ncls\nClassInfo\nClass information\n\n\nReturns\nstr\nFormatted documentation\n\n\n\n\nsource\n\n\n\n\n format_variable_doc (var:cjm_nbdev_overview.parsers.VariableInfo)\n\nFormat a variable for documentation\n\n\n\n\nType\nDetails\n\n\n\n\nvar\nVariableInfo\nVariable information\n\n\nReturns\nstr\nFormatted documentation",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "api_docs.html#formatting-functions",
+    "href": "api_docs.html#formatting-functions",
+    "title": "API Documentation Generation",
+    "section": "",
+    "text": "source\n\n\n\n format_function_doc (func:cjm_nbdev_overview.parsers.FunctionInfo,\n                      indent:str='')\n\nFormat a function with its signature for documentation\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nfunc\nFunctionInfo\n\nFunction information\n\n\nindent\nstr\n\nIndentation prefix\n\n\nReturns\nstr\n\nFormatted documentation\n\n\n\n\nsource\n\n\n\n\n format_class_doc (cls:cjm_nbdev_overview.parsers.ClassInfo)\n\nFormat a class with its signature and methods for documentation\n\n\n\n\nType\nDetails\n\n\n\n\ncls\nClassInfo\nClass information\n\n\nReturns\nstr\nFormatted documentation\n\n\n\n\nsource\n\n\n\n\n format_variable_doc (var:cjm_nbdev_overview.parsers.VariableInfo)\n\nFormat a variable for documentation\n\n\n\n\nType\nDetails\n\n\n\n\nvar\nVariableInfo\nVariable information\n\n\nReturns\nstr\nFormatted documentation",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "api_docs.html#module-documentation-generation",
+    "href": "api_docs.html#module-documentation-generation",
+    "title": "API Documentation Generation",
+    "section": "Module Documentation Generation",
+    "text": "Module Documentation Generation\n\nsource\n\ngenerate_module_overview\n\n generate_module_overview (module:cjm_nbdev_overview.parsers.ModuleInfo,\n                           show_all:bool=False)\n\nGenerate a markdown overview for a module\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nmodule\nModuleInfo\n\nModule information\n\n\nshow_all\nbool\nFalse\nShow all items including private\n\n\nReturns\nstr\n\nModule overview markdown\n\n\n\n\nsource\n\n\ngenerate_project_api_docs\n\n generate_project_api_docs (path:pathlib.Path=None, show_all:bool=False)\n\nGenerate API documentation for all modules in a project\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nProject path (defaults to nbs_path)\n\n\nshow_all\nbool\nFalse\nShow all items including private\n\n\nReturns\nstr\n\nFull API documentation",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "api_docs.html#index-update-function",
+    "href": "api_docs.html#index-update-function",
+    "title": "API Documentation Generation",
+    "section": "Index Update Function",
+    "text": "Index Update Function\nThe update_index_module_docs function can automatically update your project’s index.ipynb with module documentation:\n\nsource\n\nupdate_index_module_docs\n\n update_index_module_docs (index_path:pathlib.Path=None,\n                           start_marker:str='## Module Overview')\n\nUpdate the module documentation section in index.ipynb\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nindex_path\nPath\nNone\nPath to index.ipynb (defaults to nbs/index.ipynb)\n\n\nstart_marker\nstr\n## Module Overview\nMarker to identify module docs section\n\n\nReturns\nNone\n\nUpdates index.ipynb in place\n\n\n\n\n# Example: Update the index.ipynb with module documentation\n# update_index_module_docs()  # This will update nbs/index.ipynb\n\n# Or specify a custom path:\n# update_index_module_docs(Path(\"../other_project/nbs/index.ipynb\"))",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "api_docs.html#comprehensive-index-update-functions",
+    "href": "api_docs.html#comprehensive-index-update-functions",
+    "title": "API Documentation Generation",
+    "section": "Comprehensive Index Update Functions",
+    "text": "Comprehensive Index Update Functions\nAdditional functions to update index.ipynb with project structure, dependencies, CLI reference, and statistics:\n\nsource\n\nadd_project_structure_section\n\n add_project_structure_section (index_path:pathlib.Path=None,\n                                marker:str='## Project Structure',\n                                exclude_index:bool=True)\n\nGenerate project structure tree content for index.ipynb\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nindex_path\nPath\nNone\nPath to index.ipynb\n\n\nmarker\nstr\n## Project Structure\nSection marker\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nReturns\nstr\n\nGenerated structure content\n\n\n\n\nsource\n\n\nadd_dependencies_section\n\n add_dependencies_section (index_path:pathlib.Path=None, marker:str='##\n                           Module Dependencies', direction:str='LR')\n\nGenerate module dependencies diagram content for index.ipynb\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nindex_path\nPath\nNone\nPath to index.ipynb\n\n\nmarker\nstr\n## Module Dependencies\nSection marker\n\n\ndirection\nstr\nLR\nDiagram direction\n\n\nReturns\nstr\n\nGenerated dependencies content\n\n\n\n\nsource\n\n\nadd_cli_reference_section\n\n add_cli_reference_section (marker:str='## CLI Reference')\n\nGenerate CLI reference content for index.ipynb based on project’s console scripts\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nmarker\nstr\n## CLI Reference\nSection marker\n\n\nReturns\nstr\n\nGenerated CLI content\n\n\n\n\nsource\n\n\nupdate_index_comprehensive\n\n update_index_comprehensive (index_path:pathlib.Path=None,\n                             include_structure:bool=True,\n                             include_dependencies:bool=True,\n                             include_cli:bool=True,\n                             include_modules:bool=True)\n\nComprehensively update index.ipynb with project structure, dependencies, CLI, and modules\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nindex_path\nPath\nNone\nPath to index.ipynb\n\n\ninclude_structure\nbool\nTrue\nInclude project structure\n\n\ninclude_dependencies\nbool\nTrue\nInclude module dependencies\n\n\ninclude_cli\nbool\nTrue\nInclude CLI reference\n\n\ninclude_modules\nbool\nTrue\nInclude module documentation\n\n\nReturns\nNone\n\nUpdates index.ipynb in place\n\n\n\n\n# Example: Update index.ipynb with comprehensive documentation\n# update_index_comprehensive()  # Full update with all sections\n\n# Or customize what sections to include:\n# update_index_comprehensive(\n#     include_structure=True,     # Project tree\n#     include_dependencies=True,  # Module dependencies \n#     include_cli=True,          # CLI reference\n#     include_modules=True       # Module documentation\n# )",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "api_docs.html#testing",
+    "href": "api_docs.html#testing",
+    "title": "API Documentation Generation",
+    "section": "Testing",
+    "text": "Testing\nLet’s test the API documentation generation on our project:\n\n# First, let's export our modules\nimport nbdev\nnbdev.nbdev_export()\n\n\n# Test the updated generate_module_overview function\nimport nbdev\nnbdev.nbdev_export()\n\n# Test generating documentation for a single module\ncore_module = parse_notebook(Path(\"core.ipynb\"))\nprint(\"Updated module overview with import statements:\")\nprint(\"=\" * 50)\nprint(generate_module_overview(core_module))\n\nUpdated module overview with import statements:\n==================================================\n### Core Utilities (`core.ipynb`)\n&gt; Core utilities and data models for nbdev project overview generation\n\n#### Import\n\n```python\n# Import statements not available\n```\n\n#### Functions\n\n```python\ndef get_notebook_files(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = True        # Search subdirectories\n                      ) -&gt; List[Path]:              # List of notebook paths\n    \"Get all notebook files in a directory\"\n```\n\n```python\ndef get_subdirectories(path: Path = None,           # Directory to search (defaults to nbs_path)\n                      recursive: bool = False       # Include all nested subdirectories\n                      ) -&gt; List[Path]:              # List of directory paths\n    \"Get subdirectories in a directory\"\n```\n\n```python\ndef read_notebook(path: Path                    # Path to notebook file\n                 ) -&gt; Dict[str, Any]:           # Notebook content as dict\n    \"Read a notebook file and return its content\"\n```\n\n```python\ndef get_cell_source(cell: Dict[str, Any]        # Notebook cell\n                   ) -&gt; str:                    # Cell source as string\n    \"Get source from a notebook cell\"\n```\n\n#### Classes\n\n```python\n@dataclass\nclass NotebookInfo:\n    \"Information about a single notebook\"\n    \n    path: Path  # Path to the notebook file\n    name: str  # Notebook filename without extension\n    title: Optional[str]  # H1 title from first cell\n    description: Optional[str]  # Blockquote description from first cell\n    export_module: Optional[str]  # Module name from default_exp\n    \n    def relative_path(self) -&gt; Path:       # Path relative to nbs directory\n        \"Get path relative to nbs directory\"\n```\n\n```python\n@dataclass\nclass DirectoryInfo:\n    \"Information about a directory in the nbs folder\"\n    \n    path: Path  # Path to the directory\n    name: str  # Directory name\n    notebook_count: int = 0  # Number of notebooks in directory\n    description: Optional[str]  # Description from folder's main notebook\n    subdirs: List[DirectoryInfo] = field(...)  # Subdirectories\n    notebooks: List[NotebookInfo] = field(...)  # Notebooks in this directory\n    \n    def total_notebook_count(self) -&gt; int:          # Total notebooks including subdirs\n        \"Get total notebook count including subdirectories\"\n```\n\n\n\n\n# Test another module to see how the imports look\nparsers_module = parse_notebook(Path(\"parsers.ipynb\"))\nprint(\"Parsers module overview:\")\nprint(\"=\" * 30)\nprint(generate_module_overview(parsers_module)[:800] + \"...\" if len(generate_module_overview(parsers_module)) &gt; 800 else generate_module_overview(parsers_module))\n\nParsers module overview:\n==============================\n### Notebook and Module Parsing (`parsers.ipynb`)\n&gt; Parse notebook metadata, content, and extract function/class signatures with docments\n\n#### Import\n\n```python\n# Import statements not available\n```\n\n#### Functions\n\n```python\ndef extract_docments_signature(node: ast.FunctionDef,          # AST function node\n                              source_lines: List[str]          # Source code lines\n                              ) -&gt; str:                        # Function signature\n    \"Extract function signature with docments-style comments\"\n```\n\n```python\ndef _parse_decorators(node: Union[ast.ClassDef, ast.FunctionDef]  # AST node with decorators\n                     ) -&gt; List[str]:                              # List of decorator names\n    \"Parse decorators from an AST node\"\n```\n\n```python\ndef pa...",
+    "crumbs": [
+      "API Documentation Generation"
+    ]
+  },
+  {
+    "objectID": "generators.html#folder-notebook-generation",
+    "href": "generators.html#folder-notebook-generation",
+    "title": "Auto-generation Utilities",
+    "section": "Folder Notebook Generation",
+    "text": "Folder Notebook Generation\n\nsource\n\ngenerate_folder_notebook\n\n generate_folder_notebook (folder_path:pathlib.Path,\n                           title:Optional[str]=None,\n                           description:Optional[str]=None,\n                           overwrite:bool=False)\n\nGenerate a folder_name.ipynb notebook for a folder\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nfolder_path\nPath\n\nPath to folder\n\n\ntitle\nOptional\nNone\nCustom title\n\n\ndescription\nOptional\nNone\nCustom description\n\n\noverwrite\nbool\nFalse\nOverwrite existing\n\n\nReturns\nPath\n\nPath to created notebook\n\n\n\n\nsource\n\n\ngenerate_all_folder_notebooks\n\n generate_all_folder_notebooks (base_path:pathlib.Path=None,\n                                recursive:bool=True, overwrite:bool=False,\n                                dry_run:bool=False)\n\nGenerate folder notebooks for all folders that don’t have them\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nbase_path\nPath\nNone\nBase path (defaults to nbs)\n\n\nrecursive\nbool\nTrue\nInclude nested folders\n\n\noverwrite\nbool\nFalse\nOverwrite existing\n\n\ndry_run\nbool\nFalse\nJust show what would be created\n\n\nReturns\nList\n\nCreated notebook paths",
+    "crumbs": [
+      "Auto-generation Utilities"
+    ]
+  },
+  {
+    "objectID": "generators.html#interactive-folder-notebook-generation",
+    "href": "generators.html#interactive-folder-notebook-generation",
+    "title": "Auto-generation Utilities",
+    "section": "Interactive Folder Notebook Generation",
+    "text": "Interactive Folder Notebook Generation\n\nsource\n\ninteractive_folder_notebook_generator\n\n interactive_folder_notebook_generator (base_path:pathlib.Path=None)\n\nInteractively generate folder notebooks with custom titles and descriptions\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nbase_path\nPath\nNone\nBase path\n\n\nReturns\nList\n\nCreated notebooks",
+    "crumbs": [
+      "Auto-generation Utilities"
+    ]
+  },
+  {
+    "objectID": "generators.html#testing",
+    "href": "generators.html#testing",
+    "title": "Auto-generation Utilities",
+    "section": "Testing",
+    "text": "Testing\nLet’s test the generator functionality:\n\n# First, let's check if there are any folders in our project\nsubdirs = get_subdirectories()\nprint(f\"Found {len(subdirs)} subdirectories in nbs/\")\nfor d in subdirs:\n    nb_path = d / f\"{d.name}.ipynb\"\n    exists = \"✓\" if nb_path.exists() else \"✗\"\n    print(f\"{exists} {d.name}/\")\n\nFound 0 subdirectories in nbs/\n\n\n\n# Create a test folder to demonstrate the functionality\ntest_folder = Path(\"test_folder\")\nif not test_folder.exists():\n    test_folder.mkdir()\n    print(f\"Created test folder: {test_folder}\")\n    \n    # Create a sample notebook in the folder\n    sample_nb = test_folder / \"sample.ipynb\"\n    cells = [\n        mk_cell(\"# Sample Notebook\\n\\n&gt; A sample notebook for testing\", cell_type='markdown'),\n        mk_cell(\"print('Hello from sample notebook!')\", cell_type='code')\n    ]\n    nb = new_nb(cells)\n    write_nb(nb, sample_nb)\n    print(f\"Created sample notebook: {sample_nb}\")\nelse:\n    print(f\"Test folder already exists: {test_folder}\")\n\nCreated test folder: test_folder\nCreated sample notebook: test_folder/sample.ipynb\n\n\n\n# Generate a folder notebook for the test folder\ntry:\n    nb_path = generate_folder_notebook(\n        test_folder, \n        title=\"Test Folder\", \n        description=\"Testing folder notebook generation\"\n    )\n    print(f\"\\nGenerated notebook at: {nb_path}\")\n    \n    # Read and display the generated notebook content\n    nb = read_nb(nb_path)\n    print(\"\\nGenerated notebook contents:\")\n    print(\"-\" * 50)\n    for i, cell in enumerate(nb.cells):\n        print(f\"\\nCell {i+1} ({cell.cell_type}):\")\n        print(cell.source)\nexcept Exception as e:\n    print(f\"Error: {e}\")\n\nCreated notebook: /mnt/SN850X_8TB_EXT4/Projects/GitHub/cj-mills/cjm-nbdev-overview/nbs/test_folder/test_folder.ipynb\n\nGenerated notebook at: /mnt/SN850X_8TB_EXT4/Projects/GitHub/cj-mills/cjm-nbdev-overview/nbs/test_folder/test_folder.ipynb\n\nGenerated notebook contents:\n--------------------------------------------------\n\nCell 1 (markdown):\n# Test Folder\n\n&gt; Testing folder notebook generation\n\nCell 2 (code):\n\n\nCell 3 (code):\n#| export\n# This module serves as the package root for this folder\n\nCell 4 (markdown):\n## Overview\n\nThis folder contains notebooks related to testing folder notebook generation.\n\nCell 5 (markdown):\n## Notebooks in this folder:\n\n- `sample.ipynb`: A sample notebook for testing\n\nCell 6 (code):\n#| hide\nimport nbdev; nbdev.nbdev_export()\n\n\n\n# Clean up test folder\nimport shutil\nif test_folder.exists():\n    shutil.rmtree(test_folder)\n    print(f\"Cleaned up test folder: {test_folder}\")\n\nCleaned up test folder: test_folder",
+    "crumbs": [
+      "Auto-generation Utilities"
+    ]
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "Core Utilities",
+    "section": "",
+    "text": "First, let’s define the data models we’ll use throughout the project:\n\nsource\n\n\n\n NotebookInfo (path:pathlib.Path, name:str, title:Optional[str]=None,\n               description:Optional[str]=None,\n               export_module:Optional[str]=None)\n\nInformation about a single notebook\n\nsource\n\n\n\n\n DirectoryInfo (path:pathlib.Path, name:str, notebook_count:int=0,\n                description:Optional[str]=None,\n                subdirs:List[__main__.DirectoryInfo]=&lt;factory&gt;,\n                notebooks:List[__main__.NotebookInfo]=&lt;factory&gt;)\n\nInformation about a directory in the nbs folder",
+    "crumbs": [
+      "Core Utilities"
+    ]
+  },
+  {
+    "objectID": "core.html#data-models",
+    "href": "core.html#data-models",
+    "title": "Core Utilities",
+    "section": "",
+    "text": "First, let’s define the data models we’ll use throughout the project:\n\nsource\n\n\n\n NotebookInfo (path:pathlib.Path, name:str, title:Optional[str]=None,\n               description:Optional[str]=None,\n               export_module:Optional[str]=None)\n\nInformation about a single notebook\n\nsource\n\n\n\n\n DirectoryInfo (path:pathlib.Path, name:str, notebook_count:int=0,\n                description:Optional[str]=None,\n                subdirs:List[__main__.DirectoryInfo]=&lt;factory&gt;,\n                notebooks:List[__main__.NotebookInfo]=&lt;factory&gt;)\n\nInformation about a directory in the nbs folder",
+    "crumbs": [
+      "Core Utilities"
+    ]
+  },
+  {
+    "objectID": "core.html#path-utilities",
+    "href": "core.html#path-utilities",
+    "title": "Core Utilities",
+    "section": "Path Utilities",
+    "text": "Path Utilities\n\nsource\n\nget_notebook_files\n\n get_notebook_files (path:pathlib.Path=None, recursive:bool=True)\n\nGet all notebook files in a directory\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to search (defaults to nbs_path)\n\n\nrecursive\nbool\nTrue\nSearch subdirectories\n\n\nReturns\nList\n\nList of notebook paths\n\n\n\n\nsource\n\n\nget_subdirectories\n\n get_subdirectories (path:pathlib.Path=None, recursive:bool=False)\n\nGet subdirectories in a directory\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to search (defaults to nbs_path)\n\n\nrecursive\nbool\nFalse\nInclude all nested subdirectories\n\n\nReturns\nList\n\nList of directory paths",
+    "crumbs": [
+      "Core Utilities"
+    ]
+  },
+  {
+    "objectID": "core.html#notebook-reading-utilities",
+    "href": "core.html#notebook-reading-utilities",
+    "title": "Core Utilities",
+    "section": "Notebook Reading Utilities",
+    "text": "Notebook Reading Utilities\n\nsource\n\nread_notebook\n\n read_notebook (path:pathlib.Path)\n\nRead a notebook file and return its content\n\n\n\n\nType\nDetails\n\n\n\n\npath\nPath\nPath to notebook file\n\n\nReturns\nDict\nNotebook content as dict\n\n\n\n\nsource\n\n\nget_cell_source\n\n get_cell_source (cell:Dict[str,Any])\n\nGet source from a notebook cell\n\n\n\n\nType\nDetails\n\n\n\n\ncell\nDict\nNotebook cell\n\n\nReturns\nstr\nCell source as string",
+    "crumbs": [
+      "Core Utilities"
+    ]
+  },
+  {
+    "objectID": "core.html#testing",
+    "href": "core.html#testing",
+    "title": "Core Utilities",
+    "section": "Testing",
+    "text": "Testing\nLet’s test our utilities on the current project:\n\n# Test getting notebook files\nnotebooks = get_notebook_files()\nprint(f\"Found {len(notebooks)} notebooks:\")\nfor nb in notebooks[:5]:  # Show first 5\n    print(f\"  - {nb.name}\")\n\nFound 8 notebooks:\n  - 00_core.ipynb\n  - 01_parsers.ipynb\n  - 02_tree.ipynb\n  - 03_api_docs.ipynb\n  - 04_dependencies.ipynb",
+    "crumbs": [
+      "Core Utilities"
+    ]
+  },
+  {
+    "objectID": "tree.html",
+    "href": "tree.html",
+    "title": "Directory Tree Visualization",
+    "section": "",
+    "text": "First, let’s implement the basic tree generation without descriptions:\n\nsource\n\n\n\n strip_markdown_links (text:str)\n\nStrip Markdown links from text, keeping only the link text\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ntext\nstr\nText that may contain Markdown links\n\n\nReturns\nstr\nText with links removed, keeping link text\n\n\n\n\nsource\n\n\n\n\n generate_tree_lines (path:pathlib.Path, prefix:str='', is_last:bool=True,\n                      show_notebooks_only:bool=False,\n                      max_depth:Optional[int]=None, current_depth:int=0,\n                      exclude_index:bool=True, exclude_empty:bool=True)\n\nGenerate tree visualization lines for a directory\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\n\nDirectory to visualize\n\n\nprefix\nstr\n\nLine prefix for tree structure\n\n\nis_last\nbool\nTrue\nIs this the last item in parent\n\n\nshow_notebooks_only\nbool\nFalse\nOnly show notebooks, not directories\n\n\nmax_depth\nOptional\nNone\nMaximum depth to traverse\n\n\ncurrent_depth\nint\n0\nCurrent depth in traversal\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nReturns\nList\n\nLines of tree output\n\n\n\n\nsource\n\n\n\n\n generate_tree (path:pathlib.Path=None, show_notebooks_only:bool=False,\n                max_depth:Optional[int]=None, exclude_index:bool=True,\n                exclude_empty:bool=True)\n\nGenerate a tree visualization for a directory\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to visualize (defaults to nbs_path)\n\n\nshow_notebooks_only\nbool\nFalse\nOnly show notebooks, not directories\n\n\nmax_depth\nOptional\nNone\nMaximum depth to traverse\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nReturns\nstr\n\nTree visualization as string",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#basic-tree-generation",
+    "href": "tree.html#basic-tree-generation",
+    "title": "Directory Tree Visualization",
+    "section": "",
+    "text": "First, let’s implement the basic tree generation without descriptions:\n\nsource\n\n\n\n strip_markdown_links (text:str)\n\nStrip Markdown links from text, keeping only the link text\n\n\n\n\n\n\n\n\n\nType\nDetails\n\n\n\n\ntext\nstr\nText that may contain Markdown links\n\n\nReturns\nstr\nText with links removed, keeping link text\n\n\n\n\nsource\n\n\n\n\n generate_tree_lines (path:pathlib.Path, prefix:str='', is_last:bool=True,\n                      show_notebooks_only:bool=False,\n                      max_depth:Optional[int]=None, current_depth:int=0,\n                      exclude_index:bool=True, exclude_empty:bool=True)\n\nGenerate tree visualization lines for a directory\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\n\nDirectory to visualize\n\n\nprefix\nstr\n\nLine prefix for tree structure\n\n\nis_last\nbool\nTrue\nIs this the last item in parent\n\n\nshow_notebooks_only\nbool\nFalse\nOnly show notebooks, not directories\n\n\nmax_depth\nOptional\nNone\nMaximum depth to traverse\n\n\ncurrent_depth\nint\n0\nCurrent depth in traversal\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nReturns\nList\n\nLines of tree output\n\n\n\n\nsource\n\n\n\n\n generate_tree (path:pathlib.Path=None, show_notebooks_only:bool=False,\n                max_depth:Optional[int]=None, exclude_index:bool=True,\n                exclude_empty:bool=True)\n\nGenerate a tree visualization for a directory\n\n\n\n\n\n\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to visualize (defaults to nbs_path)\n\n\nshow_notebooks_only\nbool\nFalse\nOnly show notebooks, not directories\n\n\nmax_depth\nOptional\nNone\nMaximum depth to traverse\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nReturns\nstr\n\nTree visualization as string",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#testing-basic-tree",
+    "href": "tree.html#testing-basic-tree",
+    "title": "Directory Tree Visualization",
+    "section": "Testing Basic Tree",
+    "text": "Testing Basic Tree\nLet’s test the basic tree generation on our project:\n\n# Test basic tree generation\nprint(generate_tree(show_notebooks_only=True))\n\nnbs/\n├── api_docs.ipynb\n├── cli.ipynb\n├── core.ipynb\n├── dependencies.ipynb\n├── generators.ipynb\n├── parsers.ipynb\n└── tree.ipynb",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#parsing-notebook-information",
+    "href": "tree.html#parsing-notebook-information",
+    "title": "Directory Tree Visualization",
+    "section": "Parsing Notebook Information",
+    "text": "Parsing Notebook Information\nNow let’s add functions to extract descriptions from notebooks:\n\nsource\n\nextract_notebook_info\n\n extract_notebook_info (path:pathlib.Path)\n\nExtract title and description from a notebook\n\n\n\n\nType\nDetails\n\n\n\n\npath\nPath\nPath to notebook file\n\n\nReturns\nNotebookInfo\nNotebook information\n\n\n\n\n# Test extracting notebook info\nnb_info = extract_notebook_info(Path(\"core.ipynb\"))\nprint(f\"Title: {nb_info.title}\")\nprint(f\"Description: {nb_info.description}\")\nprint(f\"Export module: {nb_info.export_module}\")\n\nTitle: Core Utilities\nDescription: Core utilities and data models for nbdev project overview generation\nExport module: core",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#tree-generation-with-descriptions",
+    "href": "tree.html#tree-generation-with-descriptions",
+    "title": "Directory Tree Visualization",
+    "section": "Tree Generation with Descriptions",
+    "text": "Tree Generation with Descriptions\nNow let’s create the enhanced tree generation that includes descriptions:\n\nsource\n\ngenerate_tree_with_descriptions\n\n generate_tree_with_descriptions (path:pathlib.Path=None,\n                                  show_counts:bool=True,\n                                  max_depth:Optional[int]=None,\n                                  exclude_index:bool=True,\n                                  exclude_empty:bool=True)\n\nGenerate tree visualization with descriptions from notebooks\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to visualize\n\n\nshow_counts\nbool\nTrue\nShow notebook counts for directories\n\n\nmax_depth\nOptional\nNone\nMaximum depth to traverse\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb from tree\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nReturns\nstr\n\nTree with descriptions",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#testing-tree-with-descriptions",
+    "href": "tree.html#testing-tree-with-descriptions",
+    "title": "Directory Tree Visualization",
+    "section": "Testing Tree with Descriptions",
+    "text": "Testing Tree with Descriptions\nLet’s test the enhanced tree on our project:\n\nTesting Markdown Link Stripping\nLet’s test that Markdown links are properly stripped from descriptions:\n\n# Test the strip_markdown_links function\ntest_cases = [\n    \"Buttons allow the user to take actions or make choices. [daisyUI docs](https://daisyui.com/components/button/)\",\n    \"A simple description with no links\",\n    \"Multiple [link one](http://example.com) and [link two](http://example.com/2) in text\",\n    \"[Link at start](http://example.com) of description\"\n]\n\nprint(\"Testing strip_markdown_links function:\")\nfor test in test_cases:\n    result = strip_markdown_links(test)\n    print(f\"\\nOriginal: {test}\")\n    print(f\"Stripped: {result}\")\n\nTesting strip_markdown_links function:\n\nOriginal: Buttons allow the user to take actions or make choices. [daisyUI docs](https://daisyui.com/components/button/)\nStripped: Buttons allow the user to take actions or make choices. daisyUI docs\n\nOriginal: A simple description with no links\nStripped: A simple description with no links\n\nOriginal: Multiple [link one](http://example.com) and [link two](http://example.com/2) in text\nStripped: Multiple link one and link two in text\n\nOriginal: [Link at start](http://example.com) of description\nStripped: Link at start of description\n\n\n\n# Test tree with descriptions\nprint(generate_tree_with_descriptions())\n\nnbs/\n├── api_docs.ipynb     # Generate module overviews with formatted signatures for nbdev projects\n├── cli.ipynb          # CLI commands for nbdev project overview generation and analysis\n├── core.ipynb         # Core utilities and data models for nbdev project overview generation\n├── dependencies.ipynb # Analyze cross-notebook imports and generate Mermaid.js dependency diagrams\n├── generators.ipynb   # Auto-generate folder_name.ipynb notebooks for nbdev project organization\n├── parsers.ipynb      # Parse notebook metadata, content, and extract function/class signatures with docments\n└── tree.ipynb         # Generate tree visualizations for nbdev project structure",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#subdirectory-tree-visualization",
+    "href": "tree.html#subdirectory-tree-visualization",
+    "title": "Directory Tree Visualization",
+    "section": "Subdirectory Tree Visualization",
+    "text": "Subdirectory Tree Visualization\nLet’s also add a function to visualize a specific subdirectory with its notebooks:\n\nsource\n\ngenerate_subdirectory_tree\n\n generate_subdirectory_tree (subdir_path:pathlib.Path,\n                             show_descriptions:bool=True,\n                             exclude_empty:bool=True,\n                             exclude_index:bool=True)\n\nGenerate tree visualization for a specific subdirectory showing all notebooks\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\nsubdir_path\nPath\n\nPath to subdirectory\n\n\nshow_descriptions\nbool\nTrue\nInclude notebook descriptions\n\n\nexclude_empty\nbool\nTrue\nExclude empty directories\n\n\nexclude_index\nbool\nTrue\nExclude index.ipynb\n\n\nReturns\nstr\n\nTree visualization",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "tree.html#summary-statistics",
+    "href": "tree.html#summary-statistics",
+    "title": "Directory Tree Visualization",
+    "section": "Summary Statistics",
+    "text": "Summary Statistics\nLet’s add a function to generate summary statistics:\n\nsource\n\nget_tree_summary\n\n get_tree_summary (path:pathlib.Path=None)\n\nGet summary statistics for notebooks in directory tree\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nDirectory to analyze\n\n\nReturns\nstr\n\nSummary string\n\n\n\n\n# Test summary\nprint(get_tree_summary())\n\nTotal: 7 notebooks",
+    "crumbs": [
+      "Directory Tree Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html",
+    "href": "dependencies.html",
+    "title": "Dependency Analysis and Visualization",
+    "section": "",
+    "text": "source\n\n\n\n ModuleDependency (source:str, target:str, import_type:str,\n                   imported_names:List[str]=&lt;factory&gt;)\n\nRepresents a dependency between modules\n\nsource\n\n\n\n\n DependencyGraph\n                  (modules:Dict[str,cjm_nbdev_overview.parsers.ModuleInfo]\n                  =&lt;factory&gt;,\n                  dependencies:List[__main__.ModuleDependency]=&lt;factory&gt;)\n\nDependency graph for a project",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html#data-models",
+    "href": "dependencies.html#data-models",
+    "title": "Dependency Analysis and Visualization",
+    "section": "",
+    "text": "source\n\n\n\n ModuleDependency (source:str, target:str, import_type:str,\n                   imported_names:List[str]=&lt;factory&gt;)\n\nRepresents a dependency between modules\n\nsource\n\n\n\n\n DependencyGraph\n                  (modules:Dict[str,cjm_nbdev_overview.parsers.ModuleInfo]\n                  =&lt;factory&gt;,\n                  dependencies:List[__main__.ModuleDependency]=&lt;factory&gt;)\n\nDependency graph for a project",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html#import-analysis",
+    "href": "dependencies.html#import-analysis",
+    "title": "Dependency Analysis and Visualization",
+    "section": "Import Analysis",
+    "text": "Import Analysis\n\nsource\n\nextract_project_imports\n\n extract_project_imports (import_str:str, project_name:str)\n\nExtract project-internal imports from an import statement\n\n\n\n\nType\nDetails\n\n\n\n\nimport_str\nstr\nImport statement\n\n\nproject_name\nstr\nProject package name\n\n\nReturns\nOptional\nDependency if internal\n\n\n\n\nsource\n\n\nanalyze_module_dependencies\n\n analyze_module_dependencies\n                              (module:cjm_nbdev_overview.parsers.ModuleInf\n                              o, project_name:str)\n\nAnalyze a module’s imports to find project-internal dependencies\n\n\n\n\nType\nDetails\n\n\n\n\nmodule\nModuleInfo\nModule to analyze\n\n\nproject_name\nstr\nProject package name\n\n\nReturns\nList\nDependencies found",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html#building-dependency-graph",
+    "href": "dependencies.html#building-dependency-graph",
+    "title": "Dependency Analysis and Visualization",
+    "section": "Building Dependency Graph",
+    "text": "Building Dependency Graph\n\nsource\n\nbuild_dependency_graph\n\n build_dependency_graph (path:pathlib.Path=None,\n                         project_name:Optional[str]=None)\n\nBuild a dependency graph for all modules in a project\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\npath\nPath\nNone\nProject path\n\n\nproject_name\nOptional\nNone\nOverride project name\n\n\nReturns\nDependencyGraph\n\nDependency graph",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html#mermaid.js-diagram-generation",
+    "href": "dependencies.html#mermaid.js-diagram-generation",
+    "title": "Dependency Analysis and Visualization",
+    "section": "Mermaid.js Diagram Generation",
+    "text": "Mermaid.js Diagram Generation\n\nsource\n\ngenerate_mermaid_diagram\n\n generate_mermaid_diagram (graph:__main__.DependencyGraph,\n                           direction:str='TD', show_imports:bool=False)\n\nGenerate a Mermaid.js dependency diagram from a dependency graph\n\n\n\n\nType\nDefault\nDetails\n\n\n\n\ngraph\nDependencyGraph\n\nDependency graph\n\n\ndirection\nstr\nTD\nDiagram direction (TD/LR)\n\n\nshow_imports\nbool\nFalse\nShow imported names\n\n\nReturns\nstr\n\nMermaid diagram code\n\n\n\n\nsource\n\n\ngenerate_dependency_matrix\n\n generate_dependency_matrix (graph:__main__.DependencyGraph)\n\nGenerate a dependency matrix showing which modules depend on which\n\n\n\n\nType\nDetails\n\n\n\n\ngraph\nDependencyGraph\nDependency graph\n\n\nReturns\nstr\nMarkdown table",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "dependencies.html#testing",
+    "href": "dependencies.html#testing",
+    "title": "Dependency Analysis and Visualization",
+    "section": "Testing",
+    "text": "Testing\nLet’s test the dependency analysis on our project:\n\n# Build dependency graph\ngraph = build_dependency_graph()\nprint(f\"Found {len(graph.modules)} modules with {len(graph.dependencies)} dependencies\")\n\nFound 7 modules with 19 dependencies\n\n\n\n# Show dependencies for each module\nfor module_name in sorted(graph.modules.keys()):\n    deps = graph.get_module_dependencies(module_name)\n    if deps:\n        print(f\"\\n{module_name} depends on:\")\n        for dep in deps:\n            print(f\"  - {dep.target}: {', '.join(dep.imported_names)}\")\n\n\napi_docs depends on:\n  - parsers: *\n  - dependencies: *\n  - tree: *\n  - core: *\n\ncli depends on:\n  - parsers: *\n  - tree: *\n  - api_docs: *\n  - dependencies: *\n\ndependencies depends on:\n  - dependencies: ModuleDependency\n  - parsers: *\n  - parsers: ModuleInfo\n  - dependencies: generate_mermaid_diagram\n  - core: *\n  - dependencies: DependencyGraph\n\ngenerators depends on:\n  - tree: *\n  - core: *\n\nparsers depends on:\n  - tree: extract_notebook_info\n  - core: *\n\ntree depends on:\n  - core: *\n\n\n\n# Test with a sample graph that includes reserved keywords\nfrom cjm_nbdev_overview.dependencies import DependencyGraph, ModuleDependency, generate_mermaid_diagram\nfrom cjm_nbdev_overview.parsers import ModuleInfo\nfrom pathlib import Path\n\n# Create test graph with reserved keywords\ntest_graph = DependencyGraph()\n\n# Add modules including ones with reserved keywords\nmodules_data = [\n    (\"colors\", \"Colors\"),\n    (\"core\", \"Core\"),\n    (\"examples\", \"Practical Usage Examples\"),\n    (\"layout\", \"Layout\"),\n    (\"modern\", \"Modern\"),\n    (\"style\", \"Style\"),  # This should trigger the reserved keyword handling\n    (\"types\", \"Type Definitions\"),\n    (\"validation\", \"Validation\"),\n    (\"variants\", \"Variants\")\n]\n\nfor name, title in modules_data:\n    module = ModuleInfo(\n        path=Path(f\"nbs/{name}.ipynb\"),\n        name=name,\n        title=title,\n        description=None,\n        functions=[],\n        classes=[],\n        variables=[],\n        imports=[]\n    )\n    test_graph.add_module(module)\n\n# Add some test dependencies\ntest_dependencies = [\n    (\"colors\", \"validation\"),\n    (\"colors\", \"types\"),\n    (\"core\", \"types\"),\n    (\"core\", \"validation\"),\n    (\"examples\", \"validation\"),\n    (\"examples\", \"variants\"),\n    (\"examples\", \"core\"),\n    (\"examples\", \"modern\"),\n    (\"examples\", \"colors\"),\n    (\"examples\", \"layout\"),\n    (\"examples\", \"style\"),  # This should work with escaped style\n    (\"layout\", \"core\"),\n    (\"layout\", \"types\"),\n    (\"layout\", \"validation\"),\n    (\"modern\", \"core\"),\n    (\"style\", \"core\"),      # This should work with escaped style\n    (\"style\", \"types\"),     # This should work with escaped style\n    (\"style\", \"colors\"),    # This should work with escaped style\n    (\"style\", \"validation\"),# This should work with escaped style\n    (\"variants\", \"core\")\n]\n\nfor source, target in test_dependencies:\n    dep = ModuleDependency(source=source, target=target, import_type=\"from\", imported_names=[\"*\"])\n    test_graph.add_dependency(dep)\n\n# Generate diagram that should now work without parse errors\nprint(\"## Test Diagram with Reserved Keywords Handled\\n\")\nprint(generate_mermaid_diagram(test_graph, direction=\"LR\"))\n\n## Test Diagram with Reserved Keywords Handled\n\n```mermaid\ngraph LR\n    colors[colors&lt;br/&gt;Colors]\n    core[core&lt;br/&gt;Core]\n    examples[examples&lt;br/&gt;Practical Usage Examples]\n    layout[layout&lt;br/&gt;Layout]\n    modern[modern&lt;br/&gt;Modern]\n    style_mod[style&lt;br/&gt;Style]\n    types[types&lt;br/&gt;Type Definitions]\n    validation[validation&lt;br/&gt;Validation]\n    variants[variants&lt;br/&gt;Variants]\n\n    colors --&gt; validation\n    colors --&gt; types\n    core --&gt; types\n    core --&gt; validation\n    examples --&gt; validation\n    examples --&gt; variants\n    examples --&gt; core\n    examples --&gt; modern\n    examples --&gt; colors\n    examples --&gt; layout\n    examples --&gt; style_mod\n    layout --&gt; core\n    layout --&gt; types\n    layout --&gt; validation\n    modern --&gt; core\n    style_mod --&gt; core\n    style_mod --&gt; types\n    style_mod --&gt; colors\n    style_mod --&gt; validation\n    variants --&gt; core\n```\n\n\n\n# Test nested module imports\ntest_imports = [\n    \"from cjm_fasthtml_daisyui.core.base import DaisyComponent, DaisySize\",\n    \"from cjm_fasthtml_daisyui.core.colors import SemanticColor\",\n    \"from cjm_fasthtml_daisyui.core.behaviors import InteractiveMixin, FormControlMixin\",\n    \"from cjm_fasthtml_daisyui.core.modifiers import StyleType, HasStyles\",\n    \"from cjm_fasthtml_daisyui.core.htmx import HTMXComponent, HTMXAttrs\",\n    \"from cjm_fasthtml_daisyui.core import *\"\n]\n\nprint(\"Testing nested module import extraction:\")\nprint(\"-\" * 50)\nfor import_str in test_imports:\n    dep = extract_project_imports(import_str, \"cjm_fasthtml_daisyui\")\n    if dep:\n        print(f\"Import: {import_str}\")\n        print(f\"  Target module: {dep.target}\")\n        print(f\"  Imported names: {', '.join(dep.imported_names)}\")\n        print()\n\nTesting nested module import extraction:\n--------------------------------------------------\nImport: from cjm_fasthtml_daisyui.core.base import DaisyComponent, DaisySize\n  Target module: core.base\n  Imported names: DaisyComponent, DaisySize\n\nImport: from cjm_fasthtml_daisyui.core.colors import SemanticColor\n  Target module: core.colors\n  Imported names: SemanticColor\n\nImport: from cjm_fasthtml_daisyui.core.behaviors import InteractiveMixin, FormControlMixin\n  Target module: core.behaviors\n  Imported names: InteractiveMixin, FormControlMixin\n\nImport: from cjm_fasthtml_daisyui.core.modifiers import StyleType, HasStyles\n  Target module: core.modifiers\n  Imported names: StyleType, HasStyles\n\nImport: from cjm_fasthtml_daisyui.core.htmx import HTMXComponent, HTMXAttrs\n  Target module: core.htmx\n  Imported names: HTMXComponent, HTMXAttrs\n\nImport: from cjm_fasthtml_daisyui.core import *\n  Target module: core\n  Imported names: *\n\n\n\n\n# Test with a graph that simulates the nested module structure from the bug report\nnested_test_graph = DependencyGraph()\n\n# Add nested modules like in the bug report\nnested_modules = [\n    (\"actions.button\", \"Button\"),\n    (\"core.animation\", \"Animation & Transitions\"),\n    (\"core.base\", \"Core Base Classes\"),\n    (\"core.behaviors\", \"Behavior States\"),\n    (\"core.colors\", \"Colors\"),\n    (\"core.config\", \"Configuration\"),\n    (\"core.factory\", \"Component Factory\"),\n    (\"core.htmx\", \"HTMX Integration\"),\n    (\"core.modifiers\", \"Style Modifiers\"),\n    (\"core.parts\", \"Component Parts\"),\n    (\"core.placement\", \"Placement & Direction\"),\n    (\"core.resources\", \"Resources\"),\n    (\"core.testing\", \"Testing\"),\n    (\"core.validation\", \"Validation\"),\n    (\"core.variants\", \"Variant System\")\n]\n\nfor name, title in nested_modules:\n    module = ModuleInfo(\n        path=Path(f\"nbs/{name.replace('.', '/')}.ipynb\"),\n        name=name,\n        title=title,\n        description=None,\n        functions=[],\n        classes=[],\n        variables=[],\n        imports=[]\n    )\n    nested_test_graph.add_module(module)\n\n# Add dependencies from actions.button to various core modules\ndependencies_to_add = [\n    (\"actions.button\", \"core.base\", [\"DaisyComponent\", \"DaisySize\"]),\n    (\"actions.button\", \"core.colors\", [\"SemanticColor\"]),\n    (\"actions.button\", \"core.behaviors\", [\"InteractiveMixin\", \"FormControlMixin\"]),\n    (\"actions.button\", \"core.modifiers\", [\"StyleType\", \"HasStyles\"]),\n    (\"actions.button\", \"core.htmx\", [\"HTMXComponent\", \"HTMXAttrs\"]),\n    # Self-dependencies within core\n    (\"core.base\", \"core.colors\", [\"*\"]),\n    (\"core.factory\", \"core.base\", [\"*\"]),\n    (\"core.htmx\", \"core.base\", [\"*\"]),\n    (\"core.testing\", \"core.validation\", [\"*\"]),\n    (\"core.validation\", \"core.config\", [\"*\"])\n]\n\nfor source, target, imported in dependencies_to_add:\n    dep = ModuleDependency(source=source, target=target, import_type=\"from\", imported_names=imported)\n    nested_test_graph.add_dependency(dep)\n\n# Generate the corrected diagram\nprint(\"## Fixed Mermaid Diagram with Nested Modules\\n\")\nprint(generate_mermaid_diagram(nested_test_graph, direction=\"LR\"))\nprint(f\"\\n*{len(nested_test_graph.dependencies)} cross-module dependencies detected*\")\n\n## Fixed Mermaid Diagram with Nested Modules\n\n```mermaid\ngraph LR\n    actions_button[actions.button&lt;br/&gt;Button]\n    core_animation[core.animation&lt;br/&gt;Animation & Transitions]\n    core_base[core.base&lt;br/&gt;Core Base Classes]\n    core_behaviors[core.behaviors&lt;br/&gt;Behavior States]\n    core_colors[core.colors&lt;br/&gt;Colors]\n    core_config[core.config&lt;br/&gt;Configuration]\n    core_factory[core.factory&lt;br/&gt;Component Factory]\n    core_htmx[core.htmx&lt;br/&gt;HTMX Integration]\n    core_modifiers[core.modifiers&lt;br/&gt;Style Modifiers]\n    core_parts[core.parts&lt;br/&gt;Component Parts]\n    core_placement[core.placement&lt;br/&gt;Placement & Direction]\n    core_resources[core.resources&lt;br/&gt;Resources]\n    core_testing[core.testing&lt;br/&gt;Testing]\n    core_validation[core.validation&lt;br/&gt;Validation]\n    core_variants[core.variants&lt;br/&gt;Variant System]\n\n    actions_button --&gt; core_base\n    actions_button --&gt; core_colors\n    actions_button --&gt; core_behaviors\n    actions_button --&gt; core_modifiers\n    actions_button --&gt; core_htmx\n    core_base --&gt; core_colors\n    core_factory --&gt; core_base\n    core_htmx --&gt; core_base\n    core_testing --&gt; core_validation\n    core_validation --&gt; core_config\n```\n\n*10 cross-module dependencies detected*\n\n\n\n# Generate dependency matrix\nprint(\"\\n## Dependency Matrix\\n\")\nprint(generate_dependency_matrix(graph))\n\n\n## Dependency Matrix\n\n| Module | api_docs | cli | core | dependencies | generators | parsers | tree |\n|--------|----|----|----|----|----|----|----|\n| api_docs |   |   | ✓ | ✓ |   | ✓ | ✓ |\n| cli | ✓ |   |   | ✓ |   | ✓ | ✓ |\n| core |   |   |   |   |   |   |   |\n| dependencies |   |   | ✓ | ✓ |   | ✓ |   |\n| generators |   |   | ✓ |   |   |   | ✓ |\n| parsers |   |   | ✓ |   |   |   | ✓ |\n| tree |   |   | ✓ |   |   |   |   |",
+    "crumbs": [
+      "Dependency Analysis and Visualization"
+    ]
+  },
+  {
+    "objectID": "cli.html",
+    "href": "cli.html",
+    "title": "Command-Line Interface",
+    "section": "",
+    "text": "source\n\n\n\n tree_cmd (args:argparse.Namespace)\n\nGenerate tree visualization for nbdev project\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#tree-command",
+    "href": "cli.html#tree-command",
+    "title": "Command-Line Interface",
+    "section": "",
+    "text": "source\n\n\n\n tree_cmd (args:argparse.Namespace)\n\nGenerate tree visualization for nbdev project\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#api-documentation-command",
+    "href": "cli.html#api-documentation-command",
+    "title": "Command-Line Interface",
+    "section": "API Documentation Command",
+    "text": "API Documentation Command\n\nsource\n\napi_cmd\n\n api_cmd (args:argparse.Namespace)\n\nGenerate API documentation for nbdev project\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#dependencies-command",
+    "href": "cli.html#dependencies-command",
+    "title": "Command-Line Interface",
+    "section": "Dependencies Command",
+    "text": "Dependencies Command\n\nsource\n\ndeps_cmd\n\n deps_cmd (args:argparse.Namespace)\n\nAnalyze and visualize module dependencies\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#overview-command",
+    "href": "cli.html#overview-command",
+    "title": "Command-Line Interface",
+    "section": "Overview Command",
+    "text": "Overview Command\n\nsource\n\noverview_cmd\n\n overview_cmd (args:argparse.Namespace)\n\nGenerate complete project overview\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#update-index-command",
+    "href": "cli.html#update-index-command",
+    "title": "Command-Line Interface",
+    "section": "Update Index Command",
+    "text": "Update Index Command\n\nsource\n\nupdate_index_cmd\n\n update_index_cmd (args:argparse.Namespace)\n\nUpdate index.ipynb with module documentation\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments\n\n\n\n\nsource\n\n\nupdate_comprehensive_cmd\n\n update_comprehensive_cmd (args:argparse.Namespace)\n\nComprehensively update index.ipynb with all sections\n\n\n\n\nType\nDetails\n\n\n\n\nargs\nNamespace\nParsed command line arguments",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#main-cli-entry-point",
+    "href": "cli.html#main-cli-entry-point",
+    "title": "Command-Line Interface",
+    "section": "Main CLI Entry Point",
+    "text": "Main CLI Entry Point\n\nsource\n\nmain\n\n main ()\n\nMain CLI entry point for nbdev-overview",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  },
+  {
+    "objectID": "cli.html#console-script-registration",
+    "href": "cli.html#console-script-registration",
+    "title": "Command-Line Interface",
+    "section": "Console Script Registration",
+    "text": "Console Script Registration\nFor the CLI to work, we need to register it as a console script in the project settings:\n\n# Add this to settings.ini under [options.entry_points]:\n# console_scripts = nbdev-overview=cjm_nbdev_overview.cli:main",
+    "crumbs": [
+      "Command-Line Interface"
+    ]
+  }
+]
