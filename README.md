@@ -58,15 +58,15 @@ graph LR
     tree[tree<br/>Directory Tree Visualization]
 
     api_docs --> parsers
-    api_docs --> dependencies
     api_docs --> tree
+    api_docs --> dependencies
     api_docs --> core
+    cli --> tree
     cli --> api_docs
     cli --> parsers
     cli --> dependencies
-    cli --> tree
-    dependencies --> parsers
     dependencies --> dependencies
+    dependencies --> parsers
     dependencies --> core
     generators --> tree
     generators --> core
@@ -636,7 +636,7 @@ def parse_variable(node: Union[ast.Assign, ast.AnnAssign],    # AST assignment n
 
 ``` python
 def parse_code_cell(cell: Dict[str, Any]                       # Notebook code cell
-                   ) -> Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:  # TODO: Add return description
+                   ) -> Tuple[List[FunctionInfo], List[ClassInfo], List[VariableInfo], List[str]]:  # (functions, classes, variables, imports)
     "Parse a notebook code cell for functions, classes, variables, and imports"
 ```
 
