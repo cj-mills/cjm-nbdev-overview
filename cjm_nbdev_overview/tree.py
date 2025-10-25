@@ -21,17 +21,16 @@ ALIGNMENT_BUFFER = 1
 def _directory_has_notebooks(path: Path,                        # Directory to check
                             exclude_index: bool = True          # Exclude index.ipynb from check
                             ) -> bool:                          # True if contains notebooks
-    "Check if a directory contains any notebooks (directly or in subdirectories)"
+    """Check if a directory contains any notebooks (directly or in subdirectories)"""
     notebooks = get_notebook_files(path, recursive=True)
     if exclude_index:
         notebooks = [nb for nb in notebooks if nb.name not in ['index.ipynb', '00_index.ipynb']]
     return len(notebooks) > 0
 
 #| export
-def strip_markdown_links(
-    text: str  # TODO: Add description
-) -> str:  # TODO: Add return description
-    "Strip Markdown links from text, keeping only the link text"
+def strip_markdown_links(text:str  # Text that may contain Markdown links
+                         ) -> str:  # Text with links removed, keeping link text
+    """Strip Markdown links from text, keeping only the link text"""
     # Pattern matches [link text](url)
     pattern = r'\[([^\]]+)\]\([^\)]+\)'
     return re.sub(pattern, r'\1', text)

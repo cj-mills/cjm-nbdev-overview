@@ -392,11 +392,10 @@ def _filter_cells_removing_sections(cells: List,               # List of noteboo
 # %% ../nbs/api_docs.ipynb 19
 def _sort_notebooks_by_prefix(notebooks: List[Path]             # List of notebook paths
                              ) -> List[Path]:                   # Sorted notebook paths
-    "Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"
-    def sort_key(
-        nb_path: Path  # TODO: Add description
-    ) -> tuple:  # TODO: Add return description
-        "TODO: Add function description"
+    """Sort notebooks by their numeric prefix, putting non-numbered notebooks at the end"""
+    def sort_key(nb_path:Path  # Notebook path to extract sort key from
+                ) -> tuple:    # (numeric prefix, stem) for sorting
+        """Extract sort key from notebook path"""
         match = re.match(r'^(\d+)', nb_path.stem)
         if match:
             return (int(match.group(1)), nb_path.stem)
@@ -636,7 +635,7 @@ def update_index_comprehensive(index_path: Path = None,         # Path to index.
                               include_cli: bool = True,         # Include CLI reference
                               include_modules: bool = True      # Include module documentation
                               ) -> None:                        # Updates index.ipynb in place
-    "Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"
+    """Comprehensively update index.ipynb with project structure, dependencies, CLI, and modules"""
     if index_path is None:
         cfg = get_config()
         index_path = cfg.nbs_path / "index.ipynb"
@@ -724,10 +723,9 @@ def update_index_comprehensive(index_path: Path = None,         # Path to index.
             new_sections.append(header_cell)
             
             # Sort notebooks by their numeric prefix
-            def sort_key(
-                nb_path  # TODO: Add type hint and description
-            ): # TODO: Add type hint
-                "TODO: Add function description"
+            def sort_key(nb_path:Path  # Notebook path to extract sort key from
+                        ) -> tuple:    # (numeric prefix, stem) for sorting
+                """Extract sort key from notebook path"""
                 match = re.match(r'^(\d+)', nb_path.stem)
                 if match:
                     return (int(match.group(1)), nb_path.stem)

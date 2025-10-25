@@ -57,16 +57,16 @@ graph LR
     parsers[parsers<br/>Notebook and Module Parsing]
     tree[tree<br/>Directory Tree Visualization]
 
-    api_docs --> dependencies
     api_docs --> parsers
+    api_docs --> dependencies
     api_docs --> tree
     api_docs --> core
     cli --> api_docs
-    cli --> tree
-    cli --> dependencies
     cli --> parsers
-    dependencies --> dependencies
+    cli --> dependencies
+    cli --> tree
     dependencies --> parsers
+    dependencies --> dependencies
     dependencies --> core
     generators --> tree
     generators --> core
@@ -285,50 +285,43 @@ from cjm_nbdev_overview.cli import (
 #### Functions
 
 ``` python
-def tree_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def tree_cmd(args:argparse.Namespace  # Parsed command line arguments
+            ):                         # None
     "Generate tree visualization for nbdev project"
 ```
 
 ``` python
-def api_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def api_cmd(args:argparse.Namespace  # Parsed command line arguments
+           ):                         # None
     "Generate API documentation for nbdev project"
 ```
 
 ``` python
-def deps_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def deps_cmd(args:argparse.Namespace  # Parsed command line arguments
+            ):                         # None
     "Analyze and visualize module dependencies"
 ```
 
 ``` python
-def overview_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def overview_cmd(args:argparse.Namespace  # Parsed command line arguments
+                ):                         # None
     "Generate complete project overview"
 ```
 
 ``` python
-def update_index_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def update_index_cmd(args:argparse.Namespace  # Parsed command line arguments
+                    ):                         # None
     "Update index.ipynb with module documentation"
 ```
 
 ``` python
-def update_comprehensive_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def update_comprehensive_cmd(args:argparse.Namespace  # Parsed command line arguments
+                            ):                         # None
     "Comprehensively update index.ipynb with all sections"
 ```
 
 ``` python
-def main(
-): # TODO: Add type hint
+def main():  # None
     "Main CLI entry point for nbdev-overview"
 ```
 
@@ -487,16 +480,14 @@ class DependencyGraph:
     modules: Dict[str, ModuleInfo] = field(...)  # Module name -> ModuleInfo
     dependencies: List[ModuleDependency] = field(...)  # All dependencies
     
-    def add_module(
-            self,
-            module: ModuleInfo  # TODO: Add description
-        ): # Add a module to the graph - TODO: Add type hint
+    def add_module(self,
+                       module:ModuleInfo  # Module to add to the graph
+                       ):                  # None
         "Add a module to the dependency graph"
     
-    def add_dependency(
-            self,
-            dep: ModuleDependency  # TODO: Add description
-        ): # Add a dependency - TODO: Add type hint
+    def add_dependency(self,
+                           dep:ModuleDependency  # Dependency to add
+                           ):                     # None
         "Add a dependency to the graph"
     
     def get_module_dependencies(self, module_name: str  # Module to query
@@ -748,9 +739,8 @@ def _directory_has_notebooks(path: Path,                        # Directory to c
 ```
 
 ``` python
-def strip_markdown_links(
-    text: str  # TODO: Add description
-) -> str:  # TODO: Add return description
+def strip_markdown_links(text:str  # Text that may contain Markdown links
+                         ) -> str:  # Text with links removed, keeping link text
     "Strip Markdown links from text, keeping only the link text"
 ```
 

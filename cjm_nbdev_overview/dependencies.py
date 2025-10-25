@@ -29,32 +29,30 @@ class ModuleDependency:
 # %% ../nbs/dependencies.ipynb 6
 @dataclass
 class DependencyGraph:
-    "Dependency graph for a project"
+    """Dependency graph for a project"""
     modules: Dict[str, ModuleInfo] = field(default_factory=dict)  # Module name -> ModuleInfo
     dependencies: List[ModuleDependency] = field(default_factory=list)  # All dependencies
     
-    def add_module(
-        self,
-        module: ModuleInfo  # TODO: Add description
-    ): # Add a module to the graph - TODO: Add type hint
-        "Add a module to the dependency graph"
+    def add_module(self,
+                   module:ModuleInfo  # Module to add to the graph
+                   ):                  # None
+        """Add a module to the dependency graph"""
         self.modules[module.name] = module
     
-    def add_dependency(
-        self,
-        dep: ModuleDependency  # TODO: Add description
-    ): # Add a dependency - TODO: Add type hint
-        "Add a dependency to the graph"
+    def add_dependency(self,
+                       dep:ModuleDependency  # Dependency to add
+                       ):                     # None
+        """Add a dependency to the graph"""
         self.dependencies.append(dep)
     
     def get_module_dependencies(self, module_name: str  # Module to query
                                ) -> List[ModuleDependency]:  # Dependencies
-        "Get all dependencies for a specific module"
+        """Get all dependencies for a specific module"""
         return [d for d in self.dependencies if d.source == module_name]
     
     def get_module_dependents(self, module_name: str    # Module to query
                              ) -> List[ModuleDependency]:  # Dependents
-        "Get all modules that depend on a specific module"
+        """Get all modules that depend on a specific module"""
         return [d for d in self.dependencies if d.target == module_name]
 
 # %% ../nbs/dependencies.ipynb 8
@@ -171,7 +169,7 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
                            direction: str = "TD",       # Diagram direction (TD/LR)
                            show_imports: bool = False   # Show imported names
                            ) -> str:                    # Mermaid diagram code
-    "Generate a Mermaid.js dependency diagram from a dependency graph"
+    """Generate a Mermaid.js dependency diagram from a dependency graph"""
     
     # Define known Mermaid reserved keywords that need escaping
     RESERVED_KEYWORDS = {
@@ -179,19 +177,17 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
         'subgraph', 'direction', 'TD', 'LR', 'TB', 'RL', 'BT'
     }
     
-    def escape_node_name(
-        name: str  # TODO: Add description
-    ) -> str:  # TODO: Add return description
-        "Escape node names that conflict with Mermaid reserved keywords"
+    def escape_node_name(name:str  # Node name to check for conflicts
+                        ) -> str:  # Escaped name if needed
+        """Escape node names that conflict with Mermaid reserved keywords"""
         if name.lower() in RESERVED_KEYWORDS:
             # Add suffix to avoid keyword conflicts
             return name + "_mod"
         return name
     
-    def sanitize_node_id(
-        name: str  # Module name with possible dots
-    ) -> str:  # Sanitized node ID
-        "Convert module name to valid Mermaid node ID"
+    def sanitize_node_id(name:str  # Module name with possible dots
+                        ) -> str:  # Sanitized node ID
+        """Convert module name to valid Mermaid node ID"""
         # Replace dots with underscores for valid Mermaid IDs
         return name.replace('.', '_')
     

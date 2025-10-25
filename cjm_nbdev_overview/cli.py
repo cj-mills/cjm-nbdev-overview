@@ -17,9 +17,8 @@ from .parsers import *
 __all__ = ['tree_cmd', 'api_cmd', 'deps_cmd', 'overview_cmd', 'update_index_cmd', 'update_comprehensive_cmd', 'main']
 
 # %% ../nbs/cli.ipynb 5
-def tree_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def tree_cmd(args:argparse.Namespace  # Parsed command line arguments
+            ):                         # None
     "Generate tree visualization for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -53,9 +52,8 @@ def tree_cmd(
             sys.exit(1)
 
 # %% ../nbs/cli.ipynb 7
-def api_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def api_cmd(args:argparse.Namespace  # Parsed command line arguments
+           ):                         # None
     "Generate API documentation for nbdev project"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -94,9 +92,8 @@ def api_cmd(
             print(api_docs)
 
 # %% ../nbs/cli.ipynb 9
-def deps_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def deps_cmd(args:argparse.Namespace  # Parsed command line arguments
+            ):                         # None
     "Analyze and visualize module dependencies"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -150,9 +147,8 @@ def deps_cmd(
             print(diagram)
 
 # %% ../nbs/cli.ipynb 11
-def overview_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def overview_cmd(args:argparse.Namespace  # Parsed command line arguments
+                ):                         # None
     "Generate complete project overview"
     # Get project path
     path = Path(args.path) if args.path else None
@@ -194,9 +190,8 @@ def overview_cmd(
         print(overview)
 
 # %% ../nbs/cli.ipynb 13
-def update_index_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def update_index_cmd(args:argparse.Namespace  # Parsed command line arguments
+                    ):                         # None
     "Update index.ipynb with module documentation"
     # Get index path
     index_path = Path(args.index) if args.index else None
@@ -227,9 +222,8 @@ def update_index_cmd(
         sys.exit(1)
 
 # %% ../nbs/cli.ipynb 14
-def update_comprehensive_cmd(
-    args  # TODO: Add type hint and description
-): # Command line arguments - TODO: Add type hint
+def update_comprehensive_cmd(args:argparse.Namespace  # Parsed command line arguments
+                            ):                         # None
     "Comprehensively update index.ipynb with all sections"
     # Get index path
     index_path = Path(args.index) if args.index else None
@@ -277,8 +271,7 @@ def update_comprehensive_cmd(
         sys.exit(1)
 
 # %% ../nbs/cli.ipynb 16
-def main(
-): # TODO: Add type hint
+def main():  # None
     "Main CLI entry point for nbdev-overview"
     parser = argparse.ArgumentParser(
         prog='nbdev-overview',
