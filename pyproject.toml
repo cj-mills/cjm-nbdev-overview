@@ -1,3 +1,34 @@
 [build-system]
-requires = ["setuptools>=64.0"]
+requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "cjm-nbdev-overview"
+dynamic = ["version"]
+description = "Automated documentation and visualization tools for nbdev projects."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [{name = "Christian J. Mills", email = "9126128+cj-mills@users.noreply.github.com"}]
+keywords = ['nbdev', 'jupyter', 'notebook', 'python']
+classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
+dependencies = ['nbdev', 'fastcore']
+
+[project.urls]
+Repository = "https://github.com/cj-mills/cjm-nbdev-overview"
+Documentation = "https://cj-mills.github.io/cjm-nbdev-overview"
+
+[project.entry-points.nbdev]
+cjm_nbdev_overview = "cjm_nbdev_overview._modidx:d"
+
+
+[project.scripts]
+nbdev-overview = "cjm_nbdev_overview.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "cjm_nbdev_overview.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["cjm_nbdev_overview"]
+
+[tool.nbdev]
