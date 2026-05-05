@@ -29,6 +29,6 @@ nbdev-overview = "cjm_nbdev_overview.cli:main"
 version = {attr = "cjm_nbdev_overview.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["cjm_nbdev_overview"]
+include = ["cjm_nbdev_overview*"]
 
 [tool.nbdev]
