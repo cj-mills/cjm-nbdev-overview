@@ -49,27 +49,27 @@ Total: 7 notebooks
 
 ``` mermaid
 graph LR
-    api_docs[api_docs<br/>API Documentation Generation]
-    cli[cli<br/>Command-Line Interface]
-    core[core<br/>Core Utilities]
-    dependencies[dependencies<br/>Dependency Analysis and Visualization]
-    generators[generators<br/>Auto-generation Utilities]
-    parsers[parsers<br/>Notebook and Module Parsing]
-    tree[tree<br/>Directory Tree Visualization]
+    api_docs["api_docs<br/>API Documentation Generation"]
+    cli["cli<br/>Command-Line Interface"]
+    core["core<br/>Core Utilities"]
+    dependencies["dependencies<br/>Dependency Analysis and Visualization"]
+    generators["generators<br/>Auto-generation Utilities"]
+    parsers["parsers<br/>Notebook and Module Parsing"]
+    tree["tree<br/>Directory Tree Visualization"]
 
-    api_docs --> parsers
     api_docs --> tree
-    api_docs --> dependencies
     api_docs --> core
+    api_docs --> dependencies
+    api_docs --> parsers
+    cli --> dependencies
+    cli --> parsers
     cli --> tree
     cli --> api_docs
-    cli --> parsers
-    cli --> dependencies
     dependencies --> dependencies
     dependencies --> parsers
     dependencies --> core
-    generators --> tree
     generators --> core
+    generators --> tree
     parsers --> tree
     parsers --> core
     tree --> core
@@ -79,29 +79,7 @@ graph LR
 
 ## CLI Reference
 
-### `nbdev-overview` Command
-
-    usage: nbdev-overview [-h]
-                          {tree,api,deps,overview,update-index,update-comprehensive}
-                          ...
-
-    Generate comprehensive overviews for nbdev projects
-
-    positional arguments:
-      {tree,api,deps,overview,update-index,update-comprehensive}
-                            Available commands
-        tree                Generate directory tree visualization
-        api                 Generate API documentation
-        deps                Analyze module dependencies
-        overview            Generate complete project overview
-        update-index        Update index.ipynb with module documentation
-        update-comprehensive
-                            Comprehensive update of index.ipynb with all sections
-
-    options:
-      -h, --help            show this help message and exit
-
-For detailed help on any command, use `nbdev-overview <command> --help`.
+No CLI commands found in this project.
 
 ## Module Overview
 

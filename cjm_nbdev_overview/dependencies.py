@@ -193,6 +193,12 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
         # Replace dots with underscores for valid Mermaid IDs
         return name.replace('.', '_')
     
+    def escape_label_text(text:str  # Label text that may contain Mermaid-special characters
+                         ) -> str:  # Text safe to place inside a quoted Mermaid label
+        """Escape characters that break Mermaid parsing inside a quoted label"""
+        # A double quote inside a quoted label must use Mermaid's HTML entity code
+        return text.replace('"', '#quot;')
+    
     lines = []
     lines.append(f"```mermaid")
     lines.append(f"graph {direction}")
@@ -203,11 +209,14 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
         node_id = sanitize_node_id(module_name)
         escaped_id = escape_node_name(node_id)
         
-        # Create node label with original module name for display
+        # Create node label with original module name for display.
+        # Wrap the label text in quotes so special characters in titles such as
+        # (), [], {}, & don't break the Mermaid parser (e.g. "Manifest Format (v2.0)").
         if module_info.title:
-            label = f"{escaped_id}[{module_name}<br/>{module_info.title}]"
+            label_text = f"{module_name}<br/>{module_info.title}"
         else:
-            label = f"{escaped_id}[{module_name}]"
+            label_text = module_name
+        label = f'{escaped_id}["{escape_label_text(label_text)}"]'
         lines.append(f"    {label}")
     
     lines.append("")  # Empty line for readability
@@ -232,7 +241,7 @@ def generate_mermaid_diagram(graph: DependencyGraph,    # Dependency graph
             imports = ', '.join(unique_imports[:3])  # Limit to 3
             if len(unique_imports) > 3:
                 imports += '...'
-            lines.append(f'    {escaped_source} -->|"{imports}"| {escaped_target}')
+            lines.append(f'    {escaped_source} -->|"{escape_label_text(imports)}"| {escaped_target}')
         else:
             lines.append(f"    {escaped_source} --> {escaped_target}")
     
