@@ -57,29 +57,25 @@ graph LR
     parsers["parsers<br/>Notebook and Module Parsing"]
     tree["tree<br/>Directory Tree Visualization"]
 
-    api_docs --> tree
-    api_docs --> core
     api_docs --> dependencies
+    api_docs --> core
     api_docs --> parsers
+    api_docs --> tree
     cli --> dependencies
+    cli --> api_docs
     cli --> parsers
     cli --> tree
-    cli --> api_docs
-    dependencies --> dependencies
     dependencies --> parsers
     dependencies --> core
-    generators --> core
+    dependencies --> dependencies
     generators --> tree
+    generators --> core
     parsers --> tree
     parsers --> core
     tree --> core
 ```
 
 *16 cross-module dependencies detected*
-
-## CLI Reference
-
-No CLI commands found in this project.
 
 ## Module Overview
 
@@ -101,7 +97,6 @@ from cjm_nbdev_overview.api_docs import (
     update_index_module_docs,
     add_project_structure_section,
     add_dependencies_section,
-    add_cli_reference_section,
     update_index_comprehensive
 )
 ```
@@ -224,12 +219,6 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
                            direction: str = "LR"                # Diagram direction
                            ) -> str:                            # Generated dependencies content
     "Generate module dependencies diagram content for index.ipynb"
-```
-
-``` python
-def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
-                            ) -> str:                           # Generated CLI content
-    "Generate CLI reference content for index.ipynb based on project's console scripts"
 ```
 
 ``` python
