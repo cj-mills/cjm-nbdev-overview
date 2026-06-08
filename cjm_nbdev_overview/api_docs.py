@@ -556,54 +556,81 @@ import importlib.util
 import argparse
 from typing import Optional
 
+try:
+    import tomllib  # Python 3.11+
+except ModuleNotFoundError:  # pragma: no cover
+    try:
+        import tomli as tomllib
+    except ModuleNotFoundError:
+        tomllib = None
+
+
+def _console_scripts_from_pyproject() -> list:  # [(name, "module:func"), ...]
+    "Read `[project.scripts]` from the project's pyproject.toml (nbdev v3 / PEP 621)."
+    if tomllib is None:
+        return []
+    cfg = get_config()
+    # nbdev v3 points `config_file` at pyproject.toml; fall back to config_path + cwd.
+    candidates = [getattr(cfg, 'config_file', None),
+                  Path(getattr(cfg, 'config_path', '.')) / 'pyproject.toml',
+                  Path.cwd() / 'pyproject.toml']
+    pyproject = next((Path(p) for p in candidates
+                      if p and Path(p).name == 'pyproject.toml' and Path(p).exists()), None)
+    if pyproject is None:
+        return []
+    data = tomllib.loads(pyproject.read_text())
+    scripts = (data.get('project', {}) or {}).get('scripts', {}) or {}
+    return list(scripts.items())
+
+
 def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
                             ) -> str:                           # Generated CLI content
     "Generate CLI reference content for index.ipynb based on project's console scripts"
-    
+
     cfg = get_config()
-    
-    # Check if project has console scripts
+
+    # Console scripts moved homes across nbdev versions: v2 exposed `console_scripts`
+    # on the config (settings.ini); v3 (PEP 621) declares them in pyproject.toml
+    # `[project.scripts]`. Support both so the tool works pre- and post-migration.
     console_scripts = getattr(cfg, 'console_scripts', None)
-    if not console_scripts:
-        return f"{marker}\n\nNo CLI commands found in this project."
-    
-    content = f"{marker}\n\n"
-    
-    # Parse console scripts to find CLI commands
     cli_commands = []
-    if console_scripts:
+    if console_scripts:  # nbdev v2: space/newline-separated "name=module:func"
         for script in console_scripts.split():
             if '=' in script:
                 script_name, module_path = script.split('=', 1)
                 cli_commands.append((script_name, module_path))
-    
+    else:  # nbdev v3: read [project.scripts] from pyproject.toml
+        cli_commands = _console_scripts_from_pyproject()
+
     if not cli_commands:
         return f"{marker}\n\nNo CLI commands found in this project."
-    
+
+    content = f"{marker}\n\n"
+
     # Generate documentation for each CLI command
     for script_name, module_path in cli_commands:
         content += f"### `{script_name}` Command\n\n"
-        
+
         try:
             # Try to get help text by running the command
-            result = subprocess.run([script_name, '--help'], 
-                                  capture_output=True, text=True, timeout=10)
+            result = subprocess.run([script_name, '--help'],
+                                    capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 # Parse the help output to extract commands
                 help_text = result.stdout
                 content += "```\n"
                 content += help_text
                 content += "\n```\n\n"
-                
+
                 # Extract subcommands if they exist
                 if 'Available commands:' in help_text or 'subcommands:' in help_text.lower():
                     content += f"#### Usage Examples\n\n"
                     content += "```bash\n"
-                    
+
                     # Extract command names from help text
                     lines = help_text.split('\n')
                     in_commands_section = False
-                    
+
                     for line in lines:
                         if 'available commands' in line.lower() or 'subcommands' in line.lower():
                             in_commands_section = True
@@ -618,16 +645,16 @@ def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
                                     content += f"{script_name} {cmd}\n\n"
                         elif in_commands_section and not line.strip():
                             break
-                    
+
                     content += "```\n\n"
             else:
                 content += f"CLI command `{script_name}` found but help text unavailable.\n\n"
-                
+
         except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
             content += f"CLI command `{script_name}` found but help text unavailable.\n\n"
-    
+
     content += f"For detailed help on any command, use `{cli_commands[0][0]} <command> --help`."
-    
+
     return content
 
 # %% ../nbs/api_docs.ipynb #o0kdzl54p09
