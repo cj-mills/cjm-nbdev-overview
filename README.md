@@ -57,25 +57,51 @@ graph LR
     parsers["parsers<br/>Notebook and Module Parsing"]
     tree["tree<br/>Directory Tree Visualization"]
 
+    api_docs --> parsers
     api_docs --> dependencies
     api_docs --> core
-    api_docs --> parsers
     api_docs --> tree
-    cli --> dependencies
-    cli --> api_docs
     cli --> parsers
+    cli --> api_docs
+    cli --> dependencies
     cli --> tree
     dependencies --> parsers
     dependencies --> core
     dependencies --> dependencies
-    generators --> tree
     generators --> core
-    parsers --> tree
+    generators --> tree
     parsers --> core
+    parsers --> tree
     tree --> core
 ```
 
 *16 cross-module dependencies detected*
+
+## CLI Reference
+
+### `nbdev-overview` Command
+
+    usage: nbdev-overview [-h]
+                          {tree,api,deps,overview,update-index,update-comprehensive}
+                          ...
+
+    Generate comprehensive overviews for nbdev projects
+
+    positional arguments:
+      {tree,api,deps,overview,update-index,update-comprehensive}
+                            Available commands
+        tree                Generate directory tree visualization
+        api                 Generate API documentation
+        deps                Analyze module dependencies
+        overview            Generate complete project overview
+        update-index        Update index.ipynb with module documentation
+        update-comprehensive
+                            Comprehensive update of index.ipynb with all sections
+
+    options:
+      -h, --help            show this help message and exit
+
+For detailed help on any command, use `nbdev-overview <command> --help`.
 
 ## Module Overview
 
@@ -97,6 +123,7 @@ from cjm_nbdev_overview.api_docs import (
     update_index_module_docs,
     add_project_structure_section,
     add_dependencies_section,
+    add_cli_reference_section,
     update_index_comprehensive
 )
 ```
@@ -219,6 +246,19 @@ def add_dependencies_section(index_path: Path = None,           # Path to index.
                            direction: str = "LR"                # Diagram direction
                            ) -> str:                            # Generated dependencies content
     "Generate module dependencies diagram content for index.ipynb"
+```
+
+``` python
+def _console_scripts_from_pyproject() -> list:  # [(name, "module:func"), ...]
+    "Read `[project.scripts]` from the project's pyproject.toml (nbdev v3 / PEP 621)."
+    if tomllib is None
+    "Read `[project.scripts]` from the project's pyproject.toml (nbdev v3 / PEP 621)."
+```
+
+``` python
+def add_cli_reference_section(marker: str = "## CLI Reference"  # Section marker
+                            ) -> str:                           # Generated CLI content
+    "Generate CLI reference content for index.ipynb based on project's console scripts"
 ```
 
 ``` python
